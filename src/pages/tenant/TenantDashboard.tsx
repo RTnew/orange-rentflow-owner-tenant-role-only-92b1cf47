@@ -46,7 +46,7 @@ const TenantDashboard = () => {
           </div>
 
           <Button
-            onClick={() => toast.success("Payment page will open here!")}
+            onClick={() => navigate("/tenant/payments")}
             className="w-full bg-white text-primary hover:bg-white/90 font-semibold py-6 rounded-xl shadow-medium hover:shadow-glow transition-all hover:scale-105"
           >
             <CreditCard className="mr-2 h-5 w-5" />
@@ -79,21 +79,21 @@ const TenantDashboard = () => {
           <h3 className="font-semibold mb-3 text-sm">Quick Actions</h3>
           <div className="grid grid-cols-3 gap-3">
             <button 
-              onClick={() => toast.info("Agreement viewer coming soon!")}
+              onClick={() => navigate("/tenant/agreement")}
               className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
             >
               <FileText className="h-5 w-5 text-primary" />
               <span className="text-xs font-medium">Agreement</span>
             </button>
             <button 
-              onClick={() => toast.info("Schedule view coming soon!")}
+              onClick={() => navigate("/tenant/schedule")}
               className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
             >
               <Calendar className="h-5 w-5 text-primary" />
               <span className="text-xs font-medium">Schedule</span>
             </button>
             <button 
-              onClick={() => toast.info("Receipts page coming soon!")}
+              onClick={() => navigate("/tenant/receipts")}
               className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
             >
               <CreditCard className="h-5 w-5 text-primary" />
@@ -141,21 +141,21 @@ const TenantDashboard = () => {
             <span className="text-xs font-medium">Home</span>
           </button>
           <button 
-            onClick={() => toast.info("Payments page coming soon!")}
+            onClick={() => navigate("/tenant/payments")}
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
           >
             <CreditCard className="h-5 w-5" />
             <span className="text-xs">Payments</span>
           </button>
           <button 
-            onClick={() => toast.info("Documents page coming soon!")}
+            onClick={() => navigate("/tenant/documents")}
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
           >
             <FileText className="h-5 w-5" />
             <span className="text-xs">Documents</span>
           </button>
           <button 
-            onClick={() => toast.info("Profile page coming soon!")}
+            onClick={() => navigate("/tenant/profile")}
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
           >
             <User className="h-5 w-5" />
