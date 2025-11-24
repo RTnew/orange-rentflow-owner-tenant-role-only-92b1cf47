@@ -1,4 +1,4 @@
-import { Building2, DollarSign, AlertCircle, TrendingUp, Plus, Home, Users, FileText } from "lucide-react";
+import { Building2, DollarSign, AlertCircle, TrendingUp, Plus, Home, Users, FileText, UserPlus, BarChart3, User, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -85,24 +85,24 @@ const OwnerDashboard = () => {
           <h3 className="font-semibold mb-3 text-sm">Quick Actions</h3>
           <div className="grid grid-cols-3 gap-3">
             <button 
-              onClick={() => toast.info("Add property feature coming soon!")}
+              onClick={() => navigate("/owner/add-property")}
               className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
             >
               <Home className="h-5 w-5 text-primary" />
               <span className="text-xs font-medium">Add Property</span>
             </button>
             <button 
-              onClick={() => toast.info("Add tenant feature coming soon!")}
+              onClick={() => navigate("/owner/add-tenant")}
               className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
             >
-              <Users className="h-5 w-5 text-primary" />
+              <UserPlus className="h-5 w-5 text-primary" />
               <span className="text-xs font-medium">Add Tenant</span>
             </button>
             <button 
-              onClick={() => toast.info("Reports feature coming soon!")}
+              onClick={() => navigate("/owner/reports")}
               className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
             >
-              <FileText className="h-5 w-5 text-primary" />
+              <BarChart3 className="h-5 w-5 text-primary" />
               <span className="text-xs font-medium">Reports</span>
             </button>
           </div>
@@ -116,7 +116,7 @@ const OwnerDashboard = () => {
               variant="ghost" 
               size="sm" 
               className="text-primary"
-              onClick={() => toast.info("Property list view coming soon!")}
+              onClick={() => navigate("/owner/properties")}
             >
               View All
             </Button>
@@ -164,24 +164,31 @@ const OwnerDashboard = () => {
             <span className="text-xs font-medium">Home</span>
           </button>
           <button 
-            onClick={() => toast.info("Properties page coming soon!")}
+            onClick={() => navigate("/owner/properties")}
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
           >
             <Building2 className="h-5 w-5" />
             <span className="text-xs">Properties</span>
           </button>
           <button 
-            onClick={() => toast.info("Finance page coming soon!")}
-            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
-          >
-            <DollarSign className="h-5 w-5" />
-            <span className="text-xs">Finance</span>
-          </button>
-          <button 
-            onClick={() => toast.info("Profile page coming soon!")}
+            onClick={() => navigate("/owner/tenants")}
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
           >
             <Users className="h-5 w-5" />
+            <span className="text-xs">Tenants</span>
+          </button>
+          <button 
+            onClick={() => navigate("/owner/finance")}
+            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Wallet className="h-5 w-5" />
+            <span className="text-xs">Finance</span>
+          </button>
+          <button 
+            onClick={() => navigate("/owner/profile")}
+            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+          >
+            <User className="h-5 w-5" />
             <span className="text-xs">Profile</span>
           </button>
         </div>
