@@ -1,8 +1,11 @@
 import { CreditCard, Clock, CheckCircle, FileText, Home, User, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const TenantDashboard = () => {
+  const navigate = useNavigate();
   const daysUntilDue = 5;
   const rentAmount = 1200;
   const paidThisYear = 12000;
@@ -43,6 +46,7 @@ const TenantDashboard = () => {
           </div>
 
           <Button
+            onClick={() => toast.success("Payment page will open here!")}
             className="w-full bg-white text-primary hover:bg-white/90 font-semibold py-6 rounded-xl shadow-medium hover:shadow-glow transition-all hover:scale-105"
           >
             <CreditCard className="mr-2 h-5 w-5" />
@@ -74,15 +78,24 @@ const TenantDashboard = () => {
         <div className="glass-card rounded-2xl p-4 shadow-medium mb-6">
           <h3 className="font-semibold mb-3 text-sm">Quick Actions</h3>
           <div className="grid grid-cols-3 gap-3">
-            <button className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors">
+            <button 
+              onClick={() => toast.info("Agreement viewer coming soon!")}
+              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+            >
               <FileText className="h-5 w-5 text-primary" />
               <span className="text-xs font-medium">Agreement</span>
             </button>
-            <button className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors">
+            <button 
+              onClick={() => toast.info("Schedule view coming soon!")}
+              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+            >
               <Calendar className="h-5 w-5 text-primary" />
               <span className="text-xs font-medium">Schedule</span>
             </button>
-            <button className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors">
+            <button 
+              onClick={() => toast.info("Receipts page coming soon!")}
+              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+            >
               <CreditCard className="h-5 w-5 text-primary" />
               <span className="text-xs font-medium">Receipts</span>
             </button>
@@ -120,19 +133,31 @@ const TenantDashboard = () => {
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 glass-card border-t border-border p-4">
         <div className="flex items-center justify-around max-w-md mx-auto">
-          <button className="flex flex-col items-center gap-1 text-primary">
+          <button 
+            onClick={() => navigate("/tenant/dashboard")}
+            className="flex flex-col items-center gap-1 text-primary"
+          >
             <Home className="h-5 w-5" />
             <span className="text-xs font-medium">Home</span>
           </button>
-          <button className="flex flex-col items-center gap-1 text-muted-foreground">
+          <button 
+            onClick={() => toast.info("Payments page coming soon!")}
+            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+          >
             <CreditCard className="h-5 w-5" />
             <span className="text-xs">Payments</span>
           </button>
-          <button className="flex flex-col items-center gap-1 text-muted-foreground">
+          <button 
+            onClick={() => toast.info("Documents page coming soon!")}
+            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+          >
             <FileText className="h-5 w-5" />
             <span className="text-xs">Documents</span>
           </button>
-          <button className="flex flex-col items-center gap-1 text-muted-foreground">
+          <button 
+            onClick={() => toast.info("Profile page coming soon!")}
+            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+          >
             <User className="h-5 w-5" />
             <span className="text-xs">Profile</span>
           </button>
