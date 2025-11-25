@@ -1,14 +1,25 @@
-import { ArrowLeft, User, Mail, Phone, Building2, LogOut, Settings } from "lucide-react";
+import { ArrowLeft, User, Mail, Phone, Building2, LogOut, Settings, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const [autoSmsEnabled, setAutoSmsEnabled] = useState(false);
+  const [daysBeforeDue, setDaysBeforeDue] = useState("3");
 
   const handleLogout = () => {
     toast.success("Logged out successfully!");
     navigate("/auth");
+  };
+
+  const handleSaveNotifications = () => {
+    toast.success("Notification settings saved!");
+    // TODO: Save to backend when Cloud is connected
   };
 
   return (
@@ -63,6 +74,57 @@ const Profile = () => {
               <p className="font-medium">3 Properties</p>
             </div>
           </div>
+        </div>
+
+        <div className="glass-card rounded-2xl p-6 shadow-medium space-y-5">
+          <div className="flex items-center gap-3 mb-4">
+            <Bell className="h-5 w-5 text-primary" />
+            <h3 className="font-semibold">Automatic Rent Reminders</h3>
+          </div>
+
+          <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
+            <div className="flex-1">
+              <Label htmlFor="auto-sms" className="font-medium">
+                Send SMS Notifications
+              </Label>
+              <p className="text-xs text-muted-foreground mt-1">
+                Automatically remind tenants via SMS
+              </p>
+            </div>
+            <Switch
+              id="auto-sms"
+              checked={autoSmsEnabled}
+              onCheckedChange={setAutoSmsEnabled}
+            />
+          </div>
+
+          {autoSmsEnabled && (
+            <div className="p-4 rounded-xl bg-muted/30 space-y-3">
+              <Label htmlFor="days-before" className="text-sm font-medium">
+                Send reminder (days before due date)
+              </Label>
+              <Input
+                id="days-before"
+                type="number"
+                min="1"
+                max="30"
+                value={daysBeforeDue}
+                onChange={(e) => setDaysBeforeDue(e.target.value)}
+                className="glass-card"
+                placeholder="Enter days"
+              />
+              <p className="text-xs text-muted-foreground">
+                SMS will be sent {daysBeforeDue} day{daysBeforeDue !== "1" ? "s" : ""} before rent is due
+              </p>
+            </div>
+          )}
+
+          <Button
+            onClick={handleSaveNotifications}
+            className="w-full py-5 rounded-xl shadow-medium"
+          >
+            Save Notification Settings
+          </Button>
         </div>
 
         <div className="glass-card rounded-2xl p-4 shadow-medium">
