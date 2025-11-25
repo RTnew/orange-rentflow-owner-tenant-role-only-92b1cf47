@@ -1,8 +1,9 @@
-import { ArrowLeft, User, Mail, Phone, Building2, LogOut, Settings, MessageSquare, Send } from "lucide-react";
+import { ArrowLeft, User, Mail, Phone, Building2, LogOut, Settings, MessageSquare, Send, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -20,10 +21,28 @@ const smsSchema = z.object({
     .max(500, "Message must be less than 500 characters")
 });
 
+// Mock tenant data - will be replaced with real data from backend
+const mockTenants = [
+  { id: "1", name: "John Smith", phone: "+1 234 567 8901", property: "Apartment 101" },
+  { id: "2", name: "Sarah Johnson", phone: "+1 234 567 8902", property: "Villa A" },
+  { id: "3", name: "Michael Brown", phone: "+1 234 567 8903", property: "Apartment 205" },
+  { id: "4", name: "Emily Davis", phone: "+1 234 567 8904", property: "House 15" },
+];
+
 const Profile = () => {
   const navigate = useNavigate();
+  const [selectedTenant, setSelectedTenant] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [smsMessage, setSmsMessage] = useState("Dear Tenant, your rent is due soon. Please make the payment by the due date. Thank you!");
+
+  const handleTenantSelect = (tenantId: string) => {
+    setSelectedTenant(tenantId);
+    const tenant = mockTenants.find(t => t.id === tenantId);
+    if (tenant) {
+      setPhoneNumber(tenant.phone);
+      toast.success(`Selected ${tenant.name}`);
+    }
+  };
 
   const handleLogout = () => {
     toast.success("Logged out successfully!");
@@ -119,8 +138,30 @@ const Profile = () => {
 
           <div className="space-y-3">
             <div>
+              <Label htmlFor="tenant-select" className="text-sm font-medium mb-2 block">
+                <Users className="h-4 w-4 inline mr-1" />
+                Select Tenant
+              </Label>
+              <Select value={selectedTenant} onValueChange={handleTenantSelect}>
+                <SelectTrigger id="tenant-select" className="glass-card bg-background/95 backdrop-blur z-50">
+                  <SelectValue placeholder="Choose a tenant..." />
+                </SelectTrigger>
+                <SelectContent className="bg-background/98 backdrop-blur-xl border-border z-50">
+                  {mockTenants.map((tenant) => (
+                    <SelectItem key={tenant.id} value={tenant.id} className="cursor-pointer">
+                      <div className="flex flex-col">
+                        <span className="font-medium">{tenant.name}</span>
+                        <span className="text-xs text-muted-foreground">{tenant.property} • {tenant.phone}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
               <Label htmlFor="phone-number" className="text-sm font-medium mb-2 block">
-                Tenant Phone Number
+                Phone Number
               </Label>
               <Input
                 id="phone-number"
