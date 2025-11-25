@@ -1,25 +1,60 @@
-import { ArrowLeft, User, Mail, Phone, Building2, LogOut, Settings, Bell } from "lucide-react";
+import { ArrowLeft, User, Mail, Phone, Building2, LogOut, Settings, MessageSquare, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
+import { z } from "zod";
+
+const smsSchema = z.object({
+  phoneNumber: z.string()
+    .trim()
+    .min(10, "Phone number must be at least 10 digits")
+    .max(15, "Phone number must be less than 15 digits")
+    .regex(/^[0-9+\-\s()]*$/, "Invalid phone number format"),
+  message: z.string()
+    .trim()
+    .min(1, "Message cannot be empty")
+    .max(500, "Message must be less than 500 characters")
+});
 
 const Profile = () => {
   const navigate = useNavigate();
-  const [autoSmsEnabled, setAutoSmsEnabled] = useState(false);
-  const [daysBeforeDue, setDaysBeforeDue] = useState("3");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [smsMessage, setSmsMessage] = useState("Dear Tenant, your rent is due soon. Please make the payment by the due date. Thank you!");
 
   const handleLogout = () => {
     toast.success("Logged out successfully!");
     navigate("/auth");
   };
 
-  const handleSaveNotifications = () => {
-    toast.success("Notification settings saved!");
-    // TODO: Save to backend when Cloud is connected
+  const handleSendSms = () => {
+    try {
+      // Validate inputs
+      const validated = smsSchema.parse({
+        phoneNumber: phoneNumber,
+        message: smsMessage
+      });
+
+      // Clean phone number (remove spaces, dashes, parentheses)
+      const cleanNumber = validated.phoneNumber.replace(/[\s\-()]/g, '');
+      
+      // Encode message for URL
+      const encodedMessage = encodeURIComponent(validated.message);
+      
+      // Open SMS app with pre-filled data
+      window.location.href = `sms:${cleanNumber}?body=${encodedMessage}`;
+      
+      toast.success("Opening SMS app...");
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      } else {
+        toast.error("Failed to send SMS");
+      }
+    }
   };
 
   return (
@@ -76,54 +111,52 @@ const Profile = () => {
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 shadow-medium space-y-5">
-          <div className="flex items-center gap-3 mb-4">
-            <Bell className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold">Automatic Rent Reminders</h3>
+        <div className="glass-card rounded-2xl p-6 shadow-medium space-y-4">
+          <div className="flex items-center gap-3 mb-2">
+            <MessageSquare className="h-5 w-5 text-primary" />
+            <h3 className="font-semibold">Send Rent Reminder</h3>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
-            <div className="flex-1">
-              <Label htmlFor="auto-sms" className="font-medium">
-                Send SMS Notifications
-              </Label>
-              <p className="text-xs text-muted-foreground mt-1">
-                Automatically remind tenants via SMS
-              </p>
-            </div>
-            <Switch
-              id="auto-sms"
-              checked={autoSmsEnabled}
-              onCheckedChange={setAutoSmsEnabled}
-            />
-          </div>
-
-          {autoSmsEnabled && (
-            <div className="p-4 rounded-xl bg-muted/30 space-y-3">
-              <Label htmlFor="days-before" className="text-sm font-medium">
-                Send reminder (days before due date)
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="phone-number" className="text-sm font-medium mb-2 block">
+                Tenant Phone Number
               </Label>
               <Input
-                id="days-before"
-                type="number"
-                min="1"
-                max="30"
-                value={daysBeforeDue}
-                onChange={(e) => setDaysBeforeDue(e.target.value)}
+                id="phone-number"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="+1 234 567 8900"
                 className="glass-card"
-                placeholder="Enter days"
+                maxLength={15}
               />
-              <p className="text-xs text-muted-foreground">
-                SMS will be sent {daysBeforeDue} day{daysBeforeDue !== "1" ? "s" : ""} before rent is due
+            </div>
+
+            <div>
+              <Label htmlFor="sms-message" className="text-sm font-medium mb-2 block">
+                Message
+              </Label>
+              <Textarea
+                id="sms-message"
+                value={smsMessage}
+                onChange={(e) => setSmsMessage(e.target.value)}
+                placeholder="Type your reminder message..."
+                className="glass-card min-h-[120px] resize-none"
+                maxLength={500}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                {smsMessage.length}/500 characters
               </p>
             </div>
-          )}
+          </div>
 
           <Button
-            onClick={handleSaveNotifications}
+            onClick={handleSendSms}
             className="w-full py-5 rounded-xl shadow-medium"
           >
-            Save Notification Settings
+            <Send className="mr-2 h-5 w-5" />
+            Send SMS
           </Button>
         </div>
 
