@@ -16,6 +16,21 @@ const AddProperty = () => {
     deposit: "",
     dueDate: "",
   });
+  const [images, setImages] = useState<File[]>([]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length + images.length > 5) {
+      toast.error("Maximum 5 images allowed");
+      return;
+    }
+    setImages([...images, ...files].slice(0, 5));
+    toast.success(`${files.length} image(s) added`);
+  };
+
+  const removeImage = (index: number) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,12 +113,43 @@ const AddProperty = () => {
               />
             </div>
 
-            <div className="glass-card rounded-xl p-4 border-2 border-dashed border-border">
-              <div className="flex flex-col items-center gap-2 text-center">
-                <Upload className="h-8 w-8 text-muted-foreground" />
-                <p className="text-sm font-medium">Upload Property Images</p>
-                <p className="text-xs text-muted-foreground">Click to browse files</p>
+            <div>
+              <Label>Property Images (Max 5)</Label>
+              <div className="glass-card rounded-xl p-4 border-2 border-dashed border-border">
+                <input
+                  type="file"
+                  id="images"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+                <label htmlFor="images" className="flex flex-col items-center gap-2 text-center cursor-pointer">
+                  <Upload className="h-8 w-8 text-muted-foreground" />
+                  <p className="text-sm font-medium">Upload Property Images</p>
+                  <p className="text-xs text-muted-foreground">{images.length}/5 images selected</p>
+                </label>
               </div>
+              {images.length > 0 && (
+                <div className="grid grid-cols-3 gap-2 mt-3">
+                  {images.map((img, idx) => (
+                    <div key={idx} className="relative glass-card rounded-lg p-2">
+                      <img
+                        src={URL.createObjectURL(img)}
+                        alt={`Property ${idx + 1}`}
+                        className="w-full h-20 object-cover rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(idx)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

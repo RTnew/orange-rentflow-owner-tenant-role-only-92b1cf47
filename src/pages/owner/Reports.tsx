@@ -7,8 +7,8 @@ const Reports = () => {
   const navigate = useNavigate();
 
   const reports = [
-    { title: "Monthly Income Report", period: "January 2025", amount: "$2,700" },
-    { title: "Expense Summary", period: "January 2025", amount: "$230" },
+    { title: "Monthly Income Report", period: "January 2025", amount: "₹2,700" },
+    { title: "Expense Summary", period: "January 2025", amount: "₹230" },
     { title: "Tenant Payment Status", period: "Current", amount: "3/3 Paid" },
     { title: "Property Occupancy", period: "Current", amount: "100%" },
   ];
@@ -32,11 +32,11 @@ const Reports = () => {
           <div className="grid grid-cols-2 gap-3">
             <div className="glass-card rounded-xl p-3">
               <p className="text-xs text-muted-foreground mb-1">This Month</p>
-              <p className="text-xl font-bold text-green-600">$2,470</p>
+              <p className="text-xl font-bold text-green-600">₹2,470</p>
             </div>
             <div className="glass-card rounded-xl p-3">
               <p className="text-xs text-muted-foreground mb-1">YTD Revenue</p>
-              <p className="text-xl font-bold text-primary">$2,470</p>
+              <p className="text-xl font-bold text-primary">₹2,470</p>
             </div>
           </div>
         </div>

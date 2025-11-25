@@ -1,5 +1,7 @@
-import { ArrowLeft, TrendingUp, TrendingDown, DollarSign, Receipt } from "lucide-react";
+import { ArrowLeft, TrendingUp, TrendingDown, DollarSign, Receipt, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Finance = () => {
   const navigate = useNavigate();
@@ -14,6 +16,10 @@ const Finance = () => {
   const totalIncome = 2700;
   const totalExpenses = 230;
   const netProfit = totalIncome - totalExpenses;
+
+  const handleAddExpense = () => {
+    toast.success("Add expense feature coming soon!");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-muted pb-20">
@@ -30,22 +36,28 @@ const Finance = () => {
           <div className="glass-card rounded-2xl p-4 shadow-soft">
             <TrendingUp className="h-5 w-5 text-green-500 mb-2" />
             <p className="text-xs text-muted-foreground mb-1">Income</p>
-            <p className="text-lg font-bold text-green-600">${totalIncome}</p>
+            <p className="text-lg font-bold text-green-600">₹{totalIncome}</p>
           </div>
           <div className="glass-card rounded-2xl p-4 shadow-soft">
             <TrendingDown className="h-5 w-5 text-red-500 mb-2" />
             <p className="text-xs text-muted-foreground mb-1">Expenses</p>
-            <p className="text-lg font-bold text-red-600">${totalExpenses}</p>
+            <p className="text-lg font-bold text-red-600">₹{totalExpenses}</p>
           </div>
           <div className="glass-card rounded-2xl p-4 shadow-soft">
             <DollarSign className="h-5 w-5 text-primary mb-2" />
             <p className="text-xs text-muted-foreground mb-1">Profit</p>
-            <p className="text-lg font-bold text-primary">${netProfit}</p>
+            <p className="text-lg font-bold text-primary">₹{netProfit}</p>
           </div>
         </div>
 
         <div>
-          <h2 className="text-lg font-bold mb-4">Recent Transactions</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold">Recent Transactions</h2>
+            <Button onClick={handleAddExpense} size="sm" className="rounded-full shadow-medium">
+              <Plus className="h-4 w-4 mr-1" />
+              Add Expense
+            </Button>
+          </div>
           <div className="space-y-3">
             {transactions.map((transaction) => (
               <div
@@ -75,7 +87,7 @@ const Finance = () => {
                       transaction.type === "income" ? "text-green-600" : "text-red-600"
                     }`}
                   >
-                    {transaction.type === "income" ? "+" : "-"}${transaction.amount}
+                    {transaction.type === "income" ? "+" : "-"}₹{transaction.amount}
                   </p>
                 </div>
               </div>

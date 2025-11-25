@@ -7,9 +7,9 @@ const Receipts = () => {
   const navigate = useNavigate();
 
   const receipts = [
-    { id: "REC001", month: "December 2024", amount: "$1,200", date: "Dec 1, 2024", method: "UPI" },
-    { id: "REC002", month: "November 2024", amount: "$1,200", date: "Nov 1, 2024", method: "Card" },
-    { id: "REC003", month: "October 2024", amount: "$1,200", date: "Oct 1, 2024", method: "UPI" },
+    { id: "REC001", month: "December 2024", amount: "₹1,200", date: "Dec 1, 2024", method: "UPI" },
+    { id: "REC002", month: "November 2024", amount: "₹1,200", date: "Nov 1, 2024", method: "Card" },
+    { id: "REC003", month: "October 2024", amount: "₹1,200", date: "Oct 1, 2024", method: "UPI" },
   ];
 
   return (

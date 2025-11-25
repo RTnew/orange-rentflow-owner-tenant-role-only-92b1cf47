@@ -5,10 +5,10 @@ const Schedule = () => {
   const navigate = useNavigate();
 
   const schedule = [
-    { month: "January 2025", dueDate: "Jan 1, 2025", amount: "$1,200", status: "Upcoming" },
-    { month: "December 2024", dueDate: "Dec 1, 2024", amount: "$1,200", status: "Paid" },
-    { month: "November 2024", dueDate: "Nov 1, 2024", amount: "$1,200", status: "Paid" },
-    { month: "October 2024", dueDate: "Oct 1, 2024", amount: "$1,200", status: "Paid" },
+    { month: "January 2025", dueDate: "Jan 1, 2025", amount: "₹1,200", status: "Upcoming" },
+    { month: "December 2024", dueDate: "Dec 1, 2024", amount: "₹1,200", status: "Paid" },
+    { month: "November 2024", dueDate: "Nov 1, 2024", amount: "₹1,200", status: "Paid" },
+    { month: "October 2024", dueDate: "Oct 1, 2024", amount: "₹1,200", status: "Paid" },
   ];
 
   return (
@@ -29,7 +29,7 @@ const Schedule = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-2xl font-bold text-primary">$1,200</p>
+              <p className="text-2xl font-bold text-primary">₹1,200</p>
               <p className="text-xs text-muted-foreground">Due January 1, 2025</p>
             </div>
             <div className="glass-card px-3 py-2 rounded-full bg-orange-50">
