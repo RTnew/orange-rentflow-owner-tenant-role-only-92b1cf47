@@ -11,9 +11,9 @@ const TenantDashboard = () => {
   const paidThisYear = 12000;
 
   const paymentHistory = [
-    { month: "December 2024", amount: "$1,200", status: "Paid", date: "Dec 1, 2024" },
-    { month: "November 2024", amount: "$1,200", status: "Paid", date: "Nov 1, 2024" },
-    { month: "October 2024", amount: "$1,200", status: "Paid", date: "Oct 1, 2024" },
+    { month: "December 2024", amount: "₹1,200", status: "Paid", date: "Dec 1, 2024" },
+    { month: "November 2024", amount: "₹1,200", status: "Paid", date: "Nov 1, 2024" },
+    { month: "October 2024", amount: "₹1,200", status: "Paid", date: "Oct 1, 2024" },
   ];
 
   return (
@@ -30,7 +30,7 @@ const TenantDashboard = () => {
           <div className="flex items-start justify-between mb-4">
             <div>
               <p className="text-white/70 text-sm mb-1">Next Payment Due</p>
-              <p className="text-3xl font-bold">${rentAmount}</p>
+              <p className="text-3xl font-bold">₹{rentAmount}</p>
             </div>
             <div className="glass-card px-3 py-1.5 rounded-full">
               <p className="text-xs font-medium">Due in {daysUntilDue} days</p>
@@ -63,7 +63,7 @@ const TenantDashboard = () => {
               <CheckCircle className="h-5 w-5 text-green-500" />
               <span className="text-xs text-muted-foreground">Paid This Year</span>
             </div>
-            <p className="text-2xl font-bold text-green-600">${paidThisYear.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-green-600">₹{paidThisYear.toLocaleString()}</p>
           </div>
           <div className="glass-card rounded-2xl p-4 shadow-soft">
             <div className="flex items-center gap-2 mb-2">

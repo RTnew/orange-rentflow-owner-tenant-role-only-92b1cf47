@@ -1,12 +1,13 @@
-import { ArrowLeft, User, Mail, Phone, Building2, LogOut, Settings, MessageSquare, Send, Users } from "lucide-react";
+import { ArrowLeft, User, Mail, Phone, Building2, LogOut, Settings, MessageSquare, Send, Users, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 
 const smsSchema = z.object({
@@ -34,6 +35,22 @@ const Profile = () => {
   const [selectedTenant, setSelectedTenant] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [smsMessage, setSmsMessage] = useState("Dear Tenant, your rent is due soon. Please make the payment by the due date. Thank you!");
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return document.documentElement.classList.contains("dark");
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDarkMode]);
+
+  const handleDarkModeToggle = (checked: boolean) => {
+    setIsDarkMode(checked);
+    toast.success(`Dark mode ${checked ? "enabled" : "disabled"}`);
+  };
 
   const handleTenantSelect = (tenantId: string) => {
     setSelectedTenant(tenantId);
@@ -201,10 +218,27 @@ const Profile = () => {
           </Button>
         </div>
 
-        <div className="glass-card rounded-2xl p-4 shadow-medium">
-          <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors">
+        <div className="glass-card rounded-2xl p-6 shadow-medium space-y-4">
+          <h3 className="font-semibold mb-3">Account Settings</h3>
+          
+          <div className="glass-card rounded-xl p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="glass-card p-3 rounded-xl bg-primary/10">
+                  {isDarkMode ? <Moon className="h-6 w-6 text-primary" /> : <Sun className="h-6 w-6 text-primary" />}
+                </div>
+                <div>
+                  <h3 className="font-semibold">Dark Mode</h3>
+                  <p className="text-xs text-muted-foreground">Toggle theme</p>
+                </div>
+              </div>
+              <Switch checked={isDarkMode} onCheckedChange={handleDarkModeToggle} />
+            </div>
+          </div>
+
+          <button className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-muted/50 transition-colors">
             <Settings className="h-5 w-5 text-primary" />
-            <span className="font-medium">Account Settings</span>
+            <span className="font-medium">Other Settings</span>
           </button>
         </div>
 

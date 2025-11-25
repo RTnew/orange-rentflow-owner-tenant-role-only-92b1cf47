@@ -51,7 +51,7 @@ const Properties = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-primary">${property.rent}</p>
+                    <p className="text-2xl font-bold text-primary">₹{property.rent}</p>
                     <p className="text-xs text-muted-foreground">per month</p>
                   </div>
                   <div className="text-right">

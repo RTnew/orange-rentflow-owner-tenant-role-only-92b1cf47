@@ -1,10 +1,18 @@
-import { ArrowLeft, FileText, File, Download } from "lucide-react";
+import { ArrowLeft, FileText, File, Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const Documents = () => {
   const navigate = useNavigate();
+  const [uploadedDocs, setUploadedDocs] = useState<File[]>([]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setUploadedDocs([...uploadedDocs, ...files]);
+    toast.success(`${files.length} document(s) uploaded`);
+  };
 
   const documents = [
     { name: "Rental Agreement", type: "PDF", size: "2.4 MB", date: "Jan 1, 2024" },
@@ -22,7 +30,21 @@ const Documents = () => {
         <p className="text-white/80 text-sm mt-1">Access your files anytime</p>
       </div>
 
-      <div className="px-6 mt-6 space-y-3">
+      <div className="px-6 mt-6 space-y-4">
+        <div className="glass-card rounded-2xl p-4 border-2 border-dashed border-border">
+          <input
+            type="file"
+            id="doc-upload"
+            accept=".pdf,.doc,.docx,.jpg,.png"
+            multiple
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          <label htmlFor="doc-upload" className="flex items-center justify-center gap-3 cursor-pointer">
+            <Upload className="h-5 w-5 text-primary" />
+            <span className="font-medium">Upload Documents</span>
+          </label>
+        </div>
         {documents.map((doc, index) => (
           <div key={index} className="glass-card rounded-2xl p-4 shadow-medium hover:shadow-glow transition-all">
             <div className="flex items-center gap-4">
