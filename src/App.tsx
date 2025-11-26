@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import AddProperty from "./pages/owner/AddProperty";
 import Properties from "./pages/owner/Properties";
+import ListProperty from "./pages/owner/ListProperty";
 import AddTenant from "./pages/owner/AddTenant";
 import Tenants from "./pages/owner/Tenants";
 import Finance from "./pages/owner/Finance";
@@ -20,6 +21,7 @@ import Schedule from "./pages/tenant/Schedule";
 import Receipts from "./pages/tenant/Receipts";
 import Documents from "./pages/tenant/Documents";
 import TenantProfile from "./pages/tenant/Profile";
+import BrowseProperties from "./pages/tenant/BrowseProperties";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,12 +38,14 @@ const App = () => (
           <Route path="/owner/dashboard" element={<OwnerDashboard />} />
           <Route path="/owner/add-property" element={<AddProperty />} />
           <Route path="/owner/properties" element={<Properties />} />
+          <Route path="/owner/list-property" element={<ListProperty />} />
           <Route path="/owner/add-tenant" element={<AddTenant />} />
           <Route path="/owner/tenants" element={<Tenants />} />
           <Route path="/owner/finance" element={<Finance />} />
           <Route path="/owner/reports" element={<Reports />} />
           <Route path="/owner/profile" element={<OwnerProfile />} />
           <Route path="/tenant/dashboard" element={<TenantDashboard />} />
+          <Route path="/tenant/browse-properties" element={<BrowseProperties />} />
           <Route path="/tenant/payments" element={<Payments />} />
           <Route path="/tenant/agreement" element={<Agreement />} />
           <Route path="/tenant/schedule" element={<Schedule />} />
