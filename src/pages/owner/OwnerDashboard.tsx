@@ -16,21 +16,21 @@ const OwnerDashboard = () => {
     },
     {
       title: "Rent Collected",
-      value: "$45,230",
+      value: "₹4,52,300",
       icon: DollarSign,
       change: "+12% from last month",
       color: "text-green-500",
     },
     {
       title: "Pending Payments",
-      value: "$8,400",
+      value: "₹84,000",
       icon: AlertCircle,
       change: "5 tenants",
       color: "text-orange-500",
     },
     {
       title: "This Month",
-      value: "$12,840",
+      value: "₹1,28,400",
       icon: TrendingUp,
       change: "+8% growth",
       color: "text-primary",
@@ -38,9 +38,9 @@ const OwnerDashboard = () => {
   ];
 
   const recentProperties = [
-    { name: "Sunset Apartments 304", rent: "$1,200", status: "Paid", tenant: "John Smith" },
-    { name: "Downtown Loft 12B", rent: "$2,400", status: "Pending", tenant: "Sarah Johnson" },
-    { name: "Garden View Villa", rent: "$3,200", status: "Paid", tenant: "Mike Brown" },
+    { name: "Sunset Apartments 304", rent: "₹12,000", status: "Paid", tenant: "John Smith" },
+    { name: "Downtown Loft 12B", rent: "₹24,000", status: "Pending", tenant: "Sarah Johnson" },
+    { name: "Garden View Villa", rent: "₹32,000", status: "Paid", tenant: "Mike Brown" },
   ];
 
   return (

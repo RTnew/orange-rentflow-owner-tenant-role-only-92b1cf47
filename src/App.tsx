@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import AddProperty from "./pages/owner/AddProperty";
 import Properties from "./pages/owner/Properties";
+import PropertyDetails from "./pages/owner/PropertyDetails";
 import ListProperty from "./pages/owner/ListProperty";
 import AddTenant from "./pages/owner/AddTenant";
 import Tenants from "./pages/owner/Tenants";
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/owner/dashboard" element={<OwnerDashboard />} />
           <Route path="/owner/add-property" element={<AddProperty />} />
           <Route path="/owner/properties" element={<Properties />} />
+          <Route path="/owner/property/:id" element={<PropertyDetails />} />
           <Route path="/owner/list-property" element={<ListProperty />} />
           <Route path="/owner/add-tenant" element={<AddTenant />} />
           <Route path="/owner/tenants" element={<Tenants />} />
