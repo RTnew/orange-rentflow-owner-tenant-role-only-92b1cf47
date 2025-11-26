@@ -1,4 +1,4 @@
-import { CreditCard, Clock, CheckCircle, FileText, Home, User, Calendar } from "lucide-react";
+import { CreditCard, Clock, CheckCircle, FileText, Home, User, Calendar, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
@@ -77,7 +77,14 @@ const TenantDashboard = () => {
         {/* Quick Actions */}
         <div className="glass-card rounded-2xl p-4 shadow-medium mb-6">
           <h3 className="font-semibold mb-3 text-sm">Quick Actions</h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-3">
+            <button 
+              onClick={() => navigate("/tenant/browse-properties")}
+              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+            >
+              <Search className="h-5 w-5 text-primary" />
+              <span className="text-xs font-medium">Browse</span>
+            </button>
             <button 
               onClick={() => navigate("/tenant/agreement")}
               className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
