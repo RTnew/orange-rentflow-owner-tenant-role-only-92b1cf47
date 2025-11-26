@@ -11,6 +11,7 @@ const ListProperty = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     propertyId: "",
+    location: "",
     description: "",
     amenities: "",
     availableFrom: "",
@@ -73,6 +74,17 @@ const ListProperty = () => {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <Label htmlFor="location">Location/Area</Label>
+              <Input
+                id="location"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                placeholder="e.g., Downtown, Suburb Area"
+                required
+              />
             </div>
 
             <div>

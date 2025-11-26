@@ -1,10 +1,14 @@
-import { ArrowLeft, Home, MapPin, Phone, Calendar } from "lucide-react";
+import { ArrowLeft, Home, MapPin, Phone, Calendar, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const BrowseProperties = () => {
   const navigate = useNavigate();
+  const [searchLocation, setSearchLocation] = useState("");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // Mock listed properties
   const listedProperties = [
@@ -12,6 +16,7 @@ const BrowseProperties = () => {
       id: 1,
       name: "Apartment 101",
       address: "123 Main St, Downtown",
+      location: "Downtown",
       rent: 1200,
       deposit: 2400,
       description: "Spacious 2BHK apartment with modern amenities. Close to metro station and shopping centers.",
@@ -25,6 +30,7 @@ const BrowseProperties = () => {
       id: 2,
       name: "Studio 3B",
       address: "789 Elm St, Suburb Area",
+      location: "Suburb Area",
       rent: 950,
       deposit: 1900,
       description: "Cozy studio apartment perfect for single professionals. Quiet neighborhood with good connectivity.",
@@ -35,6 +41,12 @@ const BrowseProperties = () => {
       images: ["/placeholder.svg"],
     },
   ];
+
+  // Filter properties by location
+  const filteredProperties = listedProperties.filter((property) =>
+    property.location.toLowerCase().includes(searchLocation.toLowerCase()) ||
+    property.address.toLowerCase().includes(searchLocation.toLowerCase())
+  );
 
   const handleContact = (property: typeof listedProperties[0]) => {
     const message = `Hi, I'm interested in ${property.name} at ${property.address}. Is it still available?`;
@@ -50,20 +62,41 @@ const BrowseProperties = () => {
         <button onClick={() => navigate("/tenant/dashboard")} className="mb-4">
           <ArrowLeft className="h-6 w-6" />
         </button>
-        <div>
+        <div className="mb-4">
           <h1 className="text-2xl font-bold">Browse Properties</h1>
-          <p className="text-white/80 text-sm mt-1">{listedProperties.length} properties available</p>
+          <p className="text-white/80 text-sm mt-1">{filteredProperties.length} properties available</p>
+        </div>
+        
+        {/* Location Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search by location..."
+            value={searchLocation}
+            onChange={(e) => setSearchLocation(e.target.value)}
+            className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60 rounded-xl"
+          />
         </div>
       </div>
 
       <div className="px-6 mt-6 space-y-4">
-        {listedProperties.map((property) => (
+        {filteredProperties.length === 0 ? (
+          <div className="glass-card rounded-2xl p-8 text-center">
+            <Home className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground">No properties found in this location</p>
+          </div>
+        ) : (
+          filteredProperties.map((property) => (
           <div
             key={property.id}
             className="glass-card rounded-2xl p-4 shadow-medium space-y-4"
           >
             {/* Property Image */}
-            <div className="w-full h-48 bg-muted rounded-xl overflow-hidden">
+            <div 
+              className="w-full h-48 bg-muted rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => setSelectedImage(property.images[0])}
+            >
               <img
                 src={property.images[0]}
                 alt={property.name}
@@ -124,8 +157,30 @@ const BrowseProperties = () => {
               Contact Owner
             </Button>
           </div>
-        ))}
+        ))
+        )}
       </div>
+
+      {/* Full Screen Image Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center animate-fade-in"
+          onClick={() => setSelectedImage(null)}
+        >
+          <button
+            onClick={() => setSelectedImage(null)}
+            className="absolute top-6 right-6 glass-card p-3 rounded-full hover:bg-white/20 transition-colors z-10"
+          >
+            <X className="h-6 w-6 text-white" />
+          </button>
+          <img
+            src={selectedImage}
+            alt="Property full view"
+            className="max-w-[90%] max-h-[90%] object-contain rounded-xl animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };
