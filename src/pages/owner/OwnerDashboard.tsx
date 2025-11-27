@@ -2,6 +2,7 @@ import { Building2, DollarSign, AlertCircle, TrendingUp, Plus, Home, Users, File
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
@@ -43,6 +44,17 @@ const OwnerDashboard = () => {
     { name: "Garden View Villa", rent: "₹32,000", status: "Paid", tenant: "Mike Brown" },
   ];
 
+  const bannerAds = [
+    { id: 1, title: "FLAT FOR SALE", subtitle: "2 BHK", location: "in Koramangala", icon: "🏢", bg: "from-orange-400 to-orange-500" },
+    { id: 2, title: "VILLA FOR RENT", subtitle: "3 BHK", location: "in Whitefield", icon: "🏡", bg: "from-blue-400 to-blue-500" },
+    { id: 3, title: "OFFICE SPACE", subtitle: "1500 sqft", location: "in HSR Layout", icon: "🏢", bg: "from-purple-400 to-purple-500" },
+    { id: 4, title: "PREMIUM FLAT", subtitle: "4 BHK", location: "in Indiranagar", icon: "🏠", bg: "from-green-400 to-green-500" },
+  ];
+
+  const handleBannerClick = (banner: typeof bannerAds[0]) => {
+    toast.info(`Opening ${banner.title} details`);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted pb-20">
       {/* Header */}
@@ -62,16 +74,27 @@ const OwnerDashboard = () => {
         </div>
 
         {/* Hero Carousel */}
-        <div className="bg-gradient-to-br from-orange-400 to-orange-500 rounded-3xl p-6 shadow-glow mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-black mb-1">FLAT FOR SALE</h2>
-              <h3 className="text-3xl font-bold text-black">2 BHK</h3>
-              <p className="text-lg font-semibold text-black/80 mt-1">in Koramangala</p>
-            </div>
-            <div className="text-6xl">🏢</div>
-          </div>
-        </div>
+        <Carousel className="mb-6">
+          <CarouselContent>
+            {bannerAds.map((banner) => (
+              <CarouselItem key={banner.id}>
+                <div 
+                  className={`bg-gradient-to-br ${banner.bg} rounded-3xl p-6 shadow-glow cursor-pointer transition-transform hover:scale-[0.98] active:scale-95`}
+                  onClick={() => handleBannerClick(banner)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-bold text-black mb-1">{banner.title}</h2>
+                      <h3 className="text-3xl font-bold text-black">{banner.subtitle}</h3>
+                      <p className="text-lg font-semibold text-black/80 mt-1">{banner.location}</p>
+                    </div>
+                    <div className="text-6xl">{banner.icon}</div>
+                  </div>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
 
         {/* Service Cards */}
         <div className="grid grid-cols-2 gap-4">
