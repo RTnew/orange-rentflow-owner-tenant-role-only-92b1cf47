@@ -17,115 +17,125 @@ const TenantDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-muted pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted pb-20">
       {/* Header */}
-      <div className="gradient-primary p-6 text-white rounded-b-[3rem]">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Hi, Tenant 👋</h1>
-          <p className="text-white/80 text-sm mt-1">Your rent dashboard</p>
+      <div className="gradient-primary p-6 text-white pb-12">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">Hi, Tenant 👋</h1>
+            <p className="text-white/90 text-base mt-2">Your rent dashboard</p>
+          </div>
         </div>
 
         {/* Main Rent Card */}
-        <div className="glass-card rounded-3xl p-6 shadow-glow">
+        <div className="bg-gradient-to-br from-orange-400 to-orange-500 rounded-3xl p-6 shadow-glow mb-6">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <p className="text-white/70 text-sm mb-1">Next Payment Due</p>
-              <p className="text-3xl font-bold">₹{rentAmount}</p>
+              <p className="text-black/70 text-base mb-2 font-medium">Next Payment Due</p>
+              <p className="text-4xl font-bold text-black">₹{rentAmount}</p>
             </div>
-            <div className="glass-card px-3 py-1.5 rounded-full">
-              <p className="text-xs font-medium">Due in {daysUntilDue} days</p>
+            <div className="bg-white/90 px-4 py-2 rounded-full">
+              <p className="text-sm font-bold text-black">Due in {daysUntilDue} days</p>
             </div>
-          </div>
-
-          <div className="mb-3">
-            <div className="flex items-center justify-between text-xs mb-2">
-              <span className="text-white/70">Payment Progress</span>
-              <span className="font-medium">{Math.floor(((30 - daysUntilDue) / 30) * 100)}%</span>
-            </div>
-            <Progress value={((30 - daysUntilDue) / 30) * 100} className="h-2" />
           </div>
 
           <Button
             onClick={() => navigate("/tenant/payments")}
-            className="w-full bg-white text-primary hover:bg-white/90 font-semibold py-6 rounded-xl shadow-medium hover:shadow-glow transition-all hover:scale-105"
+            className="w-full bg-black text-white hover:bg-black/90 font-semibold py-6 rounded-2xl shadow-medium hover:shadow-glow transition-all hover:scale-105"
           >
             <CreditCard className="mr-2 h-5 w-5" />
             Pay Rent Now
           </Button>
         </div>
-      </div>
 
-      {/* Stats */}
-      <div className="px-6 mt-6">
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="glass-card rounded-2xl p-4 shadow-soft">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <span className="text-xs text-muted-foreground">Paid This Year</span>
+        {/* Service Cards */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-emerald-700 rounded-2xl p-4 shadow-medium">
+            <div className="space-y-3 text-white">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🔧</span>
+                <span className="font-semibold">Maintenance</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">📋</span>
+                <span className="font-semibold">Agreements</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">💳</span>
+                <span className="font-semibold">Payments</span>
+              </div>
             </div>
-            <p className="text-2xl font-bold text-green-600">₹{paidThisYear.toLocaleString()}</p>
           </div>
-          <div className="glass-card rounded-2xl p-4 shadow-soft">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="h-5 w-5 text-orange-500" />
-              <span className="text-xs text-muted-foreground">On-Time Rate</span>
-            </div>
-            <p className="text-2xl font-bold text-orange-600">100%</p>
+          <div className="bg-slate-600 rounded-2xl p-4 shadow-medium flex flex-col items-center justify-center text-center">
+            <div className="text-5xl mb-2">🏠</div>
+            <p className="text-white font-semibold text-sm">Browse available properties</p>
           </div>
         </div>
+      </div>
 
-        {/* Quick Actions */}
-        <div className="glass-card rounded-2xl p-4 shadow-medium mb-6">
-          <h3 className="font-semibold mb-3 text-sm">Quick Actions</h3>
-          <div className="grid grid-cols-4 gap-3">
+      {/* Quick Actions */}
+      <div className="px-6 -mt-6">
+        <div className="mb-6">
+          <h3 className="font-bold mb-4 text-lg">Quick Actions</h3>
+          <div className="grid grid-cols-4 gap-4">
             <button 
               onClick={() => navigate("/tenant/browse-properties")}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 rounded-full bg-card hover:bg-accent/10 transition-all shadow-medium"
             >
-              <Search className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">Browse</span>
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Search className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-xs font-medium text-center">Browse</span>
             </button>
             <button 
               onClick={() => navigate("/tenant/agreement")}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 rounded-full bg-card hover:bg-accent/10 transition-all shadow-medium"
             >
-              <FileText className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">Agreement</span>
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <FileText className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-xs font-medium text-center">Agreement</span>
             </button>
             <button 
               onClick={() => navigate("/tenant/schedule")}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 rounded-full bg-card hover:bg-accent/10 transition-all shadow-medium"
             >
-              <Calendar className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">Schedule</span>
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Calendar className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-xs font-medium text-center">Schedule</span>
             </button>
             <button 
               onClick={() => navigate("/tenant/receipts")}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 rounded-full bg-card hover:bg-accent/10 transition-all shadow-medium"
             >
-              <CreditCard className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">Receipts</span>
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <CreditCard className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-xs font-medium text-center">Receipts</span>
             </button>
           </div>
         </div>
 
         {/* Payment History */}
         <div>
-          <h2 className="text-lg font-bold mb-4">Payment History</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold">Payment History</h2>
+          </div>
           <div className="space-y-3">
             {paymentHistory.map((payment, index) => (
               <div
                 key={index}
-                className="glass-card rounded-2xl p-4 hover:shadow-medium transition-all"
+                className="bg-card rounded-2xl p-4 hover:shadow-medium transition-all shadow-soft border border-border"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold text-sm mb-1">{payment.month}</h3>
-                    <p className="text-xs text-muted-foreground">{payment.date}</p>
+                    <h3 className="font-semibold text-base mb-1">{payment.month}</h3>
+                    <p className="text-sm text-muted-foreground">{payment.date}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-lg mb-1">{payment.amount}</p>
-                    <div className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-green-100 text-green-700 text-xs font-medium">
+                    <div className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-400 text-green-900 text-xs font-semibold">
                       <CheckCircle className="h-3 w-3" />
                       {payment.status}
                     </div>
@@ -144,28 +154,28 @@ const TenantDashboard = () => {
             onClick={() => navigate("/tenant/dashboard")}
             className="flex flex-col items-center gap-1 text-primary"
           >
-            <Home className="h-5 w-5" />
-            <span className="text-xs font-medium">Home</span>
+            <Home className="h-6 w-6" />
+            <span className="text-xs font-bold">Home</span>
           </button>
           <button 
             onClick={() => navigate("/tenant/payments")}
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
           >
-            <CreditCard className="h-5 w-5" />
+            <CreditCard className="h-6 w-6" />
             <span className="text-xs">Payments</span>
           </button>
           <button 
             onClick={() => navigate("/tenant/documents")}
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
           >
-            <FileText className="h-5 w-5" />
+            <FileText className="h-6 w-6" />
             <span className="text-xs">Documents</span>
           </button>
           <button 
             onClick={() => navigate("/tenant/profile")}
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
           >
-            <User className="h-5 w-5" />
+            <User className="h-6 w-6" />
             <span className="text-xs">Profile</span>
           </button>
         </div>

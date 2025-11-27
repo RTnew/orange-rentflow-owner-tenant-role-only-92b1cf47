@@ -44,73 +44,100 @@ const OwnerDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-muted pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted pb-20">
       {/* Header */}
-      <div className="gradient-primary p-6 text-white">
-        <div className="flex items-center justify-between mb-6">
+      <div className="gradient-primary p-6 text-white pb-12">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold">Welcome back, Owner</h1>
-            <p className="text-white/80 text-sm mt-1">Here's your property overview</p>
+            <h1 className="text-3xl font-bold">Welcome back, Owner</h1>
+            <p className="text-white/90 text-base mt-2">Here's your property overview</p>
           </div>
           <Button
             size="icon"
-            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl"
-            onClick={() => toast.info("Add property feature coming soon!")}
+            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full"
+            onClick={() => navigate("/owner/add-property")}
           >
-            <Plus className="h-5 w-5" />
+            <Plus className="h-6 w-6" />
           </Button>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
-              className="glass-card rounded-2xl p-4 hover:scale-105 transition-transform"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <stat.icon className={`h-5 w-5 ${stat.color}`} />
-              </div>
-              <p className="text-2xl font-bold mb-1">{stat.value}</p>
-              <p className="text-xs text-white/70">{stat.title}</p>
-              <p className="text-xs text-white/60 mt-1">{stat.change}</p>
+        {/* Hero Carousel */}
+        <div className="bg-gradient-to-br from-orange-400 to-orange-500 rounded-3xl p-6 shadow-glow mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-black mb-1">FLAT FOR SALE</h2>
+              <h3 className="text-3xl font-bold text-black">2 BHK</h3>
+              <p className="text-lg font-semibold text-black/80 mt-1">in Koramangala</p>
             </div>
-          ))}
+            <div className="text-6xl">🏢</div>
+          </div>
+        </div>
+
+        {/* Service Cards */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-emerald-700 rounded-2xl p-4 shadow-medium">
+            <div className="space-y-3 text-white">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🔧</span>
+                <span className="font-semibold">Packers & Movers</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">❄️</span>
+                <span className="font-semibold">AC Service</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">💡</span>
+                <span className="font-semibold">Plumber / Electrician</span>
+              </div>
+            </div>
+          </div>
+          <div className="bg-slate-600 rounded-2xl p-4 shadow-medium flex flex-col items-center justify-center text-center">
+            <div className="text-5xl mb-2">👤</div>
+            <p className="text-white font-semibold text-sm">Top-rated agent near you</p>
+          </div>
         </div>
       </div>
 
       {/* Quick Actions */}
       <div className="px-6 -mt-6">
-        <div className="glass-card rounded-2xl p-4 shadow-medium mb-6">
-          <h3 className="font-semibold mb-3 text-sm">Quick Actions</h3>
-          <div className="grid grid-cols-4 gap-3">
+        <div className="mb-6">
+          <h3 className="font-bold mb-4 text-lg">Quick Actions</h3>
+          <div className="grid grid-cols-4 gap-4">
             <button 
               onClick={() => navigate("/owner/add-property")}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 rounded-full bg-card hover:bg-accent/10 transition-all shadow-medium"
             >
-              <Home className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">Add Property</span>
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Home className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-xs font-medium text-center">Add Property</span>
             </button>
             <button 
               onClick={() => navigate("/owner/list-property")}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 rounded-full bg-card hover:bg-accent/10 transition-all shadow-medium"
             >
-              <Upload className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">List Property</span>
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Upload className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-xs font-medium text-center">List Property</span>
             </button>
             <button 
               onClick={() => navigate("/owner/add-tenant")}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 rounded-full bg-card hover:bg-accent/10 transition-all shadow-medium"
             >
-              <UserPlus className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">Add Tenant</span>
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <UserPlus className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-xs font-medium text-center">Add Tenant</span>
             </button>
             <button 
               onClick={() => navigate("/owner/reports")}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 rounded-full bg-card hover:bg-accent/10 transition-all shadow-medium"
             >
-              <BarChart3 className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">Reports</span>
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <BarChart3 className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-xs font-medium text-center">Reports</span>
             </button>
           </div>
         </div>
@@ -122,7 +149,7 @@ const OwnerDashboard = () => {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-primary"
+              className="text-primary hover:text-primary/80"
               onClick={() => navigate("/owner/properties")}
             >
               View All
@@ -133,26 +160,23 @@ const OwnerDashboard = () => {
             {recentProperties.map((property, index) => (
               <div
                 key={index}
-                className="glass-card rounded-2xl p-4 hover:shadow-medium transition-all"
+                className="bg-card rounded-2xl p-4 hover:shadow-medium transition-all shadow-soft border border-border"
+                onClick={() => navigate(`/owner/property/${index + 1}`)}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-sm mb-1">{property.name}</h3>
-                    <p className="text-xs text-muted-foreground">{property.tenant}</p>
+                    <h3 className="font-semibold text-base mb-1">{property.name}</h3>
+                    <p className="text-sm text-muted-foreground">{property.tenant}</p>
                   </div>
                   <div
-                    className={`px-2 py-1 rounded-lg text-xs font-medium ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
                       property.status === "Paid"
-                        ? "bg-green-100 text-green-700"
+                        ? "bg-green-400 text-green-900"
                         : "bg-orange-100 text-orange-700"
                     }`}
                   >
                     {property.status}
                   </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-primary">{property.rent}</span>
-                  <span className="text-xs text-muted-foreground">Monthly</span>
                 </div>
               </div>
             ))}
@@ -167,35 +191,35 @@ const OwnerDashboard = () => {
             onClick={() => navigate("/owner/dashboard")}
             className="flex flex-col items-center gap-1 text-primary"
           >
-            <Home className="h-5 w-5" />
-            <span className="text-xs font-medium">Home</span>
+            <Home className="h-6 w-6" />
+            <span className="text-xs font-bold">Home</span>
           </button>
           <button 
             onClick={() => navigate("/owner/properties")}
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
           >
-            <Building2 className="h-5 w-5" />
+            <Building2 className="h-6 w-6" />
             <span className="text-xs">Properties</span>
           </button>
           <button 
             onClick={() => navigate("/owner/tenants")}
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
           >
-            <Users className="h-5 w-5" />
+            <Users className="h-6 w-6" />
             <span className="text-xs">Tenants</span>
           </button>
           <button 
             onClick={() => navigate("/owner/finance")}
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
           >
-            <Wallet className="h-5 w-5" />
+            <Wallet className="h-6 w-6" />
             <span className="text-xs">Finance</span>
           </button>
           <button 
             onClick={() => navigate("/owner/profile")}
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
           >
-            <User className="h-5 w-5" />
+            <User className="h-6 w-6" />
             <span className="text-xs">Profile</span>
           </button>
         </div>
