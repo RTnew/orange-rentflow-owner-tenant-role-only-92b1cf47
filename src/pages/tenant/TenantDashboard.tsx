@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
 const TenantDashboard = () => {
   const navigate = useNavigate();
@@ -16,6 +17,21 @@ const TenantDashboard = () => {
     { month: "October 2024", amount: "₹1,200", status: "Paid", date: "Oct 1, 2024" },
   ];
 
+  const bannerAds = [
+    { id: 1, title: "NEXT PAYMENT DUE", subtitle: "₹1,200", location: "Due in 5 days", icon: "💰", bg: "from-orange-400 to-orange-500" },
+    { id: 2, title: "MAINTENANCE", subtitle: "₹500", location: "Due: Feb 1, 2024", icon: "🔧", bg: "from-blue-400 to-blue-500" },
+    { id: 3, title: "PROPERTY TAX", subtitle: "₹2,500", location: "Due: Mar 31, 2024", icon: "📄", bg: "from-purple-400 to-purple-500" },
+    { id: 4, title: "UTILITIES", subtitle: "₹800", location: "Due: Feb 10, 2024", icon: "💡", bg: "from-green-400 to-green-500" },
+  ];
+
+  const handleBannerClick = (banner: typeof bannerAds[0]) => {
+    if (banner.title === "NEXT PAYMENT DUE") {
+      navigate("/tenant/payments");
+    } else {
+      toast.info(`${banner.title}: ${banner.subtitle}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted pb-20">
       {/* Header */}
@@ -27,26 +43,28 @@ const TenantDashboard = () => {
           </div>
         </div>
 
-        {/* Main Rent Card */}
-        <div className="bg-gradient-to-br from-orange-400 to-orange-500 rounded-3xl p-6 shadow-glow mb-6">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <p className="text-black/70 text-base mb-2 font-medium">Next Payment Due</p>
-              <p className="text-4xl font-bold text-black">₹{rentAmount}</p>
-            </div>
-            <div className="bg-white/90 px-4 py-2 rounded-full">
-              <p className="text-sm font-bold text-black">Due in {daysUntilDue} days</p>
-            </div>
-          </div>
-
-          <Button
-            onClick={() => navigate("/tenant/payments")}
-            className="w-full bg-black text-white hover:bg-black/90 font-semibold py-6 rounded-2xl shadow-medium hover:shadow-glow transition-all hover:scale-105"
-          >
-            <CreditCard className="mr-2 h-5 w-5" />
-            Pay Rent Now
-          </Button>
-        </div>
+        {/* Payment Carousel */}
+        <Carousel className="mb-6">
+          <CarouselContent>
+            {bannerAds.map((banner) => (
+              <CarouselItem key={banner.id}>
+                <div 
+                  className={`bg-gradient-to-br ${banner.bg} rounded-3xl p-6 shadow-glow cursor-pointer transition-transform hover:scale-[0.98] active:scale-95`}
+                  onClick={() => handleBannerClick(banner)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-bold text-black mb-1">{banner.title}</h2>
+                      <h3 className="text-3xl font-bold text-black">{banner.subtitle}</h3>
+                      <p className="text-lg font-semibold text-black/80 mt-1">{banner.location}</p>
+                    </div>
+                    <div className="text-6xl">{banner.icon}</div>
+                  </div>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
 
         {/* Service Cards */}
         <div className="grid grid-cols-2 gap-4">
