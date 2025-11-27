@@ -2,10 +2,31 @@ import { Building2, DollarSign, AlertCircle, TrendingUp, Plus, Home, Users, File
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem, CarouselApi } from "@/components/ui/carousel";
+import { useState, useEffect } from "react";
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
+  const [bannerApi, setBannerApi] = useState<CarouselApi>();
+  const [serviceApi, setServiceApi] = useState<CarouselApi>();
+  const [currentBanner, setCurrentBanner] = useState(0);
+  const [currentService, setCurrentService] = useState(0);
+
+  useEffect(() => {
+    if (!bannerApi) return;
+    setCurrentBanner(bannerApi.selectedScrollSnap());
+    bannerApi.on("select", () => {
+      setCurrentBanner(bannerApi.selectedScrollSnap());
+    });
+  }, [bannerApi]);
+
+  useEffect(() => {
+    if (!serviceApi) return;
+    setCurrentService(serviceApi.selectedScrollSnap());
+    serviceApi.on("select", () => {
+      setCurrentService(serviceApi.selectedScrollSnap());
+    });
+  }, [serviceApi]);
 
   const stats = [
     {
@@ -51,8 +72,40 @@ const OwnerDashboard = () => {
     { id: 4, title: "PREMIUM FLAT", subtitle: "4 BHK", location: "in Indiranagar", icon: "🏠", bg: "from-green-400 to-green-500" },
   ];
 
+  const servicePages = [
+    {
+      id: 1,
+      cards: [
+        { title: "Packers & Movers", icon: "🔧", bg: "bg-emerald-700" },
+        { title: "Top-rated agent", icon: "👤", bg: "bg-slate-600" }
+      ]
+    },
+    {
+      id: 2,
+      cards: [
+        { title: "AC Service", icon: "❄️", bg: "bg-blue-700" },
+        { title: "Plumber Service", icon: "💡", bg: "bg-purple-600" }
+      ]
+    },
+    {
+      id: 3,
+      cards: [
+        { title: "Electrician", icon: "⚡", bg: "bg-orange-600" },
+        { title: "Cleaning Service", icon: "🧹", bg: "bg-teal-600" }
+      ]
+    }
+  ];
+
   const handleBannerClick = (banner: typeof bannerAds[0]) => {
     toast.info(`Opening ${banner.title} details`);
+  };
+
+  const scrollToBanner = (index: number) => {
+    bannerApi?.scrollTo(index);
+  };
+
+  const scrollToService = (index: number) => {
+    serviceApi?.scrollTo(index);
   };
 
   return (
@@ -74,7 +127,7 @@ const OwnerDashboard = () => {
         </div>
 
         {/* Hero Carousel */}
-        <Carousel className="mb-6">
+        <Carousel className="mb-2" setApi={setBannerApi}>
           <CarouselContent>
             {bannerAds.map((banner) => (
               <CarouselItem key={banner.id}>
@@ -95,29 +148,55 @@ const OwnerDashboard = () => {
             ))}
           </CarouselContent>
         </Carousel>
+        
+        {/* Banner Pagination Dots */}
+        <div className="flex justify-center gap-2 mb-6">
+          {bannerAds.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => scrollToBanner(index)}
+              className={`h-2 rounded-full transition-all ${
+                currentBanner === index ? "w-8 bg-white" : "w-2 bg-white/40"
+              }`}
+              aria-label={`Go to banner ${index + 1}`}
+            />
+          ))}
+        </div>
 
-        {/* Service Cards */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-emerald-700 rounded-2xl p-4 shadow-medium">
-            <div className="space-y-3 text-white">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🔧</span>
-                <span className="font-semibold">Packers & Movers</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl">❄️</span>
-                <span className="font-semibold">AC Service</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl">💡</span>
-                <span className="font-semibold">Plumber / Electrician</span>
-              </div>
-            </div>
-          </div>
-          <div className="bg-slate-600 rounded-2xl p-4 shadow-medium flex flex-col items-center justify-center text-center">
-            <div className="text-5xl mb-2">👤</div>
-            <p className="text-white font-semibold text-sm">Top-rated agent near you</p>
-          </div>
+        {/* Service Cards Carousel */}
+        <Carousel className="mb-2" setApi={setServiceApi}>
+          <CarouselContent>
+            {servicePages.map((page) => (
+              <CarouselItem key={page.id}>
+                <div className="grid grid-cols-2 gap-4">
+                  {page.cards.map((card, idx) => (
+                    <div 
+                      key={idx}
+                      className={`${card.bg} rounded-3xl p-6 shadow-medium flex flex-col items-center justify-center text-center cursor-pointer transition-transform hover:scale-[0.98] active:scale-95 h-32`}
+                      onClick={() => toast.info(`Opening ${card.title}`)}
+                    >
+                      <div className="text-4xl mb-2">{card.icon}</div>
+                      <p className="text-white font-semibold text-sm">{card.title}</p>
+                    </div>
+                  ))}
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+
+        {/* Service Pagination Dots */}
+        <div className="flex justify-center gap-2">
+          {servicePages.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => scrollToService(index)}
+              className={`h-2 rounded-full transition-all ${
+                currentService === index ? "w-8 bg-white" : "w-2 bg-white/40"
+              }`}
+              aria-label={`Go to service page ${index + 1}`}
+            />
+          ))}
         </div>
       </div>
 
