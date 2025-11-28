@@ -38,11 +38,11 @@ const TenantDashboard = () => {
     { month: "October 2024", amount: "₹1,200", status: "Paid", date: "Oct 1, 2024" },
   ];
 
-  const bannerAds = [
-    { id: 1, title: "NEXT PAYMENT DUE", subtitle: "₹1,200", location: "Due in 5 days", icon: "💰", bg: "from-orange-400 to-orange-500" },
-    { id: 2, title: "MAINTENANCE", subtitle: "₹500", location: "Due: Feb 1, 2024", icon: "🔧", bg: "from-blue-400 to-blue-500" },
-    { id: 3, title: "PROPERTY TAX", subtitle: "₹2,500", location: "Due: Mar 31, 2024", icon: "📄", bg: "from-purple-400 to-purple-500" },
-    { id: 4, title: "UTILITIES", subtitle: "₹800", location: "Due: Feb 10, 2024", icon: "💡", bg: "from-green-400 to-green-500" },
+  const propertyBanners = [
+    { id: 1, title: "Sunset Apartments", rent: "₹1,200/month", location: "Downtown, Mumbai", type: "2BHK", bg: "from-orange-400 to-orange-500" },
+    { id: 2, title: "Green Valley Villa", rent: "₹2,500/month", location: "Bandra West, Mumbai", type: "3BHK", bg: "from-blue-400 to-blue-500" },
+    { id: 3, title: "Skyline Residency", rent: "₹1,800/month", location: "Andheri East, Mumbai", type: "2BHK", bg: "from-purple-400 to-purple-500" },
+    { id: 4, title: "Ocean View Heights", rent: "₹3,000/month", location: "Juhu, Mumbai", type: "3BHK", bg: "from-green-400 to-green-500" },
   ];
 
   const servicePages = [
@@ -69,12 +69,8 @@ const TenantDashboard = () => {
     }
   ];
 
-  const handleBannerClick = (banner: typeof bannerAds[0]) => {
-    if (banner.title === "NEXT PAYMENT DUE") {
-      navigate("/tenant/payments");
-    } else {
-      toast.info(`${banner.title}: ${banner.subtitle}`);
-    }
+  const handlePropertyClick = (property: typeof propertyBanners[0]) => {
+    toast.info(`Viewing ${property.title}`);
   };
 
   const scrollToBanner = (index: number) => {
@@ -96,22 +92,25 @@ const TenantDashboard = () => {
           </div>
         </div>
 
-        {/* Payment Carousel */}
+        {/* Property Carousel */}
         <Carousel className="mb-2" setApi={setBannerApi}>
           <CarouselContent>
-            {bannerAds.map((banner) => (
-              <CarouselItem key={banner.id}>
+            {propertyBanners.map((property) => (
+              <CarouselItem key={property.id}>
                 <div 
-                  className={`bg-gradient-to-br ${banner.bg} rounded-3xl p-6 shadow-glow cursor-pointer transition-transform hover:scale-[0.98] active:scale-95`}
-                  onClick={() => handleBannerClick(banner)}
+                  className={`bg-gradient-to-br ${property.bg} rounded-3xl p-6 shadow-glow cursor-pointer transition-transform hover:scale-[0.98] active:scale-95`}
+                  onClick={() => handlePropertyClick(property)}
                 >
                   <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-2xl font-bold text-black mb-1">{banner.title}</h2>
-                      <h3 className="text-3xl font-bold text-black">{banner.subtitle}</h3>
-                      <p className="text-lg font-semibold text-black/80 mt-1">{banner.location}</p>
+                    <div className="flex-1">
+                      <div className="inline-block px-3 py-1 bg-black/20 rounded-full text-sm font-semibold text-white mb-2">
+                        {property.type}
+                      </div>
+                      <h2 className="text-2xl font-bold text-white mb-1">{property.title}</h2>
+                      <h3 className="text-3xl font-bold text-white">{property.rent}</h3>
+                      <p className="text-lg font-semibold text-white/90 mt-1">📍 {property.location}</p>
                     </div>
-                    <div className="text-6xl">{banner.icon}</div>
+                    <div className="text-6xl">🏢</div>
                   </div>
                 </div>
               </CarouselItem>
@@ -119,9 +118,9 @@ const TenantDashboard = () => {
           </CarouselContent>
         </Carousel>
 
-        {/* Banner Pagination Dots */}
+        {/* Property Pagination Dots */}
         <div className="flex justify-center gap-2 mb-6">
-          {bannerAds.map((_, index) => (
+          {propertyBanners.map((_, index) => (
             <button
               key={index}
               onClick={() => scrollToBanner(index)}
