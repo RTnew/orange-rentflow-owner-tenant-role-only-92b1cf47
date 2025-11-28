@@ -91,8 +91,8 @@ const TenantDashboard = () => {
       <div className="gradient-primary p-6 text-white pb-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Hi, Tenant 👋</h1>
-            <p className="text-white/90 text-base mt-2">Your rent dashboard</p>
+            <h1 className="text-3xl font-bold">Welcome back, Tenant</h1>
+            <p className="text-white/90 text-base mt-2">Here's your rent dashboard</p>
           </div>
         </div>
 
