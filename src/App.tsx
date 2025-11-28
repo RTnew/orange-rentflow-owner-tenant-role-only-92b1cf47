@@ -24,6 +24,16 @@ import Documents from "./pages/tenant/Documents";
 import TenantProfile from "./pages/tenant/Profile";
 import BrowseProperties from "./pages/tenant/BrowseProperties";
 import NotFound from "./pages/NotFound";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/Dashboard";
+import BannersList from "./pages/admin/banners/BannersList";
+import BannerForm from "./pages/admin/banners/BannerForm";
+import ServicesList from "./pages/admin/services/ServicesList";
+import ServiceForm from "./pages/admin/services/ServiceForm";
+import PropertiesOverview from "./pages/admin/PropertiesOverview";
+import UsersOverview from "./pages/admin/UsersOverview";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +64,19 @@ const App = () => (
           <Route path="/tenant/receipts" element={<Receipts />} />
           <Route path="/tenant/documents" element={<Documents />} />
           <Route path="/tenant/profile" element={<TenantProfile />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="banners" element={<BannersList />} />
+            <Route path="banners/add" element={<BannerForm />} />
+            <Route path="banners/edit/:id" element={<BannerForm />} />
+            <Route path="services" element={<ServicesList />} />
+            <Route path="services/add" element={<ServiceForm />} />
+            <Route path="services/edit/:id" element={<ServiceForm />} />
+            <Route path="properties" element={<PropertiesOverview />} />
+            <Route path="users" element={<UsersOverview />} />
+            <Route path="reports" element={<AdminReports />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
