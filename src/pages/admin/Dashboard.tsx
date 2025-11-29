@@ -1,5 +1,7 @@
 import { Building2, Users, UserCheck, DollarSign, Briefcase } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const statsCards = [
   {
@@ -40,6 +42,66 @@ const statsCards = [
 ];
 
 export default function AdminDashboard() {
+  const { data: stats } = useQuery({
+    queryKey: ["admin-stats"],
+    queryFn: async () => {
+      const [propertiesRes, profilesRes, userRolesRes, servicesRes] = await Promise.all([
+        supabase.from("properties").select("*", { count: "exact", head: true }),
+        supabase.from("profiles").select("*"),
+        supabase.from("user_roles").select("*"),
+        supabase.from("services").select("*", { count: "exact", head: true }).eq("is_active", true),
+      ]);
+
+      const owners = userRolesRes.data?.filter(r => r.role === "owner").length || 0;
+      const tenants = userRolesRes.data?.filter(r => r.role === "tenant").length || 0;
+
+      return {
+        properties: propertiesRes.count || 0,
+        owners,
+        tenants,
+        services: servicesRes.count || 0,
+      };
+    },
+  });
+
+  const statsCards = [
+    {
+      title: "Total Properties",
+      value: stats?.properties?.toString() || "0",
+      icon: Building2,
+      color: "text-blue-500",
+      bgColor: "bg-blue-500/10",
+    },
+    {
+      title: "Total Tenants",
+      value: stats?.tenants?.toString() || "0",
+      icon: Users,
+      color: "text-green-500",
+      bgColor: "bg-green-500/10",
+    },
+    {
+      title: "Total Owners",
+      value: stats?.owners?.toString() || "0",
+      icon: UserCheck,
+      color: "text-purple-500",
+      bgColor: "bg-purple-500/10",
+    },
+    {
+      title: "Pending Rents",
+      value: "₹0",
+      icon: DollarSign,
+      color: "text-red-500",
+      bgColor: "bg-red-500/10",
+    },
+    {
+      title: "Active Services",
+      value: stats?.services?.toString() || "0",
+      icon: Briefcase,
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <div>

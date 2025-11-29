@@ -8,46 +8,46 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-
-const dummyProperties = [
-  {
-    id: 1,
-    name: "Sunset Apartments",
-    owner: "Rajesh Kumar",
-    tenantCount: 12,
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Ocean View Villa",
-    owner: "Priya Sharma",
-    tenantCount: 1,
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Green Valley Homes",
-    owner: "Amit Patel",
-    tenantCount: 24,
-    status: "Active",
-  },
-  {
-    id: 4,
-    name: "Royal Residency",
-    owner: "Sneha Gupta",
-    tenantCount: 0,
-    status: "Vacant",
-  },
-  {
-    id: 5,
-    name: "City Center Plaza",
-    owner: "Vijay Singh",
-    tenantCount: 8,
-    status: "Active",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function PropertiesOverview() {
+  const { data: properties = [], isLoading } = useQuery({
+    queryKey: ["admin-properties"],
+    queryFn: async () => {
+      const { data: propertiesData, error: propertiesError } = await supabase
+        .from("properties")
+        .select("*")
+        .order("created_at", { ascending: false });
+      
+      if (propertiesError) throw propertiesError;
+
+      const { data: profilesData, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, full_name");
+      
+      if (profilesError) throw profilesError;
+
+      const propertiesWithOwners = propertiesData.map(property => ({
+        ...property,
+        owner_name: profilesData.find(p => p.id === property.owner_id)?.full_name || "Unknown"
+      }));
+      
+      return propertiesWithOwners;
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Properties Overview</h1>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -61,25 +61,33 @@ export default function PropertiesOverview() {
             <TableRow>
               <TableHead>Property Name</TableHead>
               <TableHead>Owner Name</TableHead>
-              <TableHead>Tenant Count</TableHead>
+              <TableHead>City</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {dummyProperties.map((property) => (
-              <TableRow key={property.id}>
-                <TableCell className="font-medium">{property.name}</TableCell>
-                <TableCell>{property.owner}</TableCell>
-                <TableCell>{property.tenantCount}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant={property.status === "Active" ? "default" : "secondary"}
-                  >
-                    {property.status}
-                  </Badge>
+            {properties.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                  No properties found
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              properties.map((property) => (
+                <TableRow key={property.id}>
+                  <TableCell className="font-medium">{property.name}</TableCell>
+                  <TableCell>{property.owner_name}</TableCell>
+                  <TableCell>{property.city || "-"}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={property.status === "listed" ? "default" : "secondary"}
+                    >
+                      {property.status}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </Card>

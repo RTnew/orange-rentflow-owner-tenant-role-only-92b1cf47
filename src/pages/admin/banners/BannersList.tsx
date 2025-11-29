@@ -23,53 +23,69 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-const dummyBanners = [
-  {
-    id: 1,
-    image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400",
-    title: "Premium Properties",
-    subtitle: "Discover luxury homes",
-    page: "Dashboard",
-    roles: ["owner", "tenant"],
-    order: 1,
-    active: true,
-  },
-  {
-    id: 2,
-    image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400",
-    title: "New Listings",
-    subtitle: "Fresh properties available",
-    page: "Browse",
-    roles: ["tenant"],
-    order: 2,
-    active: true,
-  },
-  {
-    id: 3,
-    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400",
-    title: "Summer Offers",
-    subtitle: "Special discount rates",
-    page: "Dashboard",
-    roles: ["owner"],
-    order: 3,
-    active: false,
-  },
-];
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function BannersList() {
   const navigate = useNavigate();
-  const [banners, setBanners] = useState(dummyBanners);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const handleToggleActive = (id: number) => {
-    setBanners(banners.map(b => b.id === id ? { ...b, active: !b.active } : b));
-  };
+  const { data: banners = [], isLoading } = useQuery({
+    queryKey: ["admin-banners"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("banners")
+        .select("*")
+        .order("order_index", { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
-  const handleDelete = (id: number) => {
-    setBanners(banners.filter(b => b.id !== id));
-    setDeleteId(null);
-  };
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("banners").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-banners"] });
+      toast({ title: "Banner deleted successfully" });
+      setDeleteId(null);
+    },
+    onError: () => {
+      toast({ title: "Error deleting banner", variant: "destructive" });
+    },
+  });
+
+  const toggleActiveMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      const { error } = await supabase
+        .from("banners")
+        .update({ is_active: isActive })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-banners"] });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Banners Management</h1>
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -99,54 +115,70 @@ export default function BannersList() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {banners.map((banner) => (
-              <TableRow key={banner.id}>
-                <TableCell>
-                  <img
-                    src={banner.image}
-                    alt={banner.title}
-                    className="w-16 h-16 object-cover rounded-lg"
-                  />
-                </TableCell>
-                <TableCell className="font-medium">{banner.title}</TableCell>
-                <TableCell>{banner.subtitle}</TableCell>
-                <TableCell>{banner.page}</TableCell>
-                <TableCell>
-                  <div className="flex gap-1">
-                    {banner.roles.map((role) => (
-                      <Badge key={role} variant="secondary">
-                        {role}
-                      </Badge>
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell>{banner.order}</TableCell>
-                <TableCell>
-                  <Switch
-                    checked={banner.active}
-                    onCheckedChange={() => handleToggleActive(banner.id)}
-                  />
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => navigate(`/admin/banners/edit/${banner.id}`)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setDeleteId(banner.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
+            {banners.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                  No banners found. Create your first banner!
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              banners.map((banner) => (
+                <TableRow key={banner.id}>
+                  <TableCell>
+                    {banner.image_url ? (
+                      <img
+                        src={banner.image_url}
+                        alt={banner.title}
+                        className="w-16 h-16 object-cover rounded-lg"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center text-xs">
+                        No image
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell className="font-medium">{banner.title}</TableCell>
+                  <TableCell>{banner.subtitle || "-"}</TableCell>
+                  <TableCell>{banner.page || "-"}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      {banner.roles?.map((role) => (
+                        <Badge key={role} variant="secondary">
+                          {role}
+                        </Badge>
+                      )) || "-"}
+                    </div>
+                  </TableCell>
+                  <TableCell>{banner.order_index}</TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={banner.is_active}
+                      onCheckedChange={(checked) =>
+                        toggleActiveMutation.mutate({ id: banner.id, isActive: checked })
+                      }
+                    />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate(`/admin/banners/edit/${banner.id}`)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setDeleteId(banner.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </Card>
@@ -161,7 +193,7 @@ export default function BannersList() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteId && handleDelete(deleteId)}>
+            <AlertDialogAction onClick={() => deleteId && deleteMutation.mutate(deleteId)}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
