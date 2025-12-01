@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Mail, Lock, User, Phone, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,27 +6,134 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+const signupSchema = z.object({
+  fullName: z.string().min(2, "Name must be at least 2 characters"),
+  phone: z.string().min(10, "Phone must be at least 10 digits"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
 
 const Auth = () => {
   const navigate = useNavigate();
+  const { user, userRole, signIn, signUp } = useAuth();
   const [selectedRole, setSelectedRole] = useState<"owner" | "tenant" | null>(null);
+  const [loading, setLoading] = useState(false);
+  
+  // Login form state
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  
+  // Signup form state
+  const [signupName, setSignupName] = useState("");
+  const [signupPhone, setSignupPhone] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
 
-  const handleLogin = () => {
+  // Redirect authenticated users
+  useEffect(() => {
+    if (user && userRole) {
+      switch (userRole) {
+        case "admin":
+          navigate("/admin", { replace: true });
+          break;
+        case "owner":
+          navigate("/owner/dashboard", { replace: true });
+          break;
+        case "tenant":
+          navigate("/tenant/dashboard", { replace: true });
+          break;
+      }
+    }
+  }, [user, userRole, navigate]);
+
+  const handleLogin = async () => {
     if (!selectedRole) {
       toast.error("Please select your role first");
       return;
     }
-    toast.success(`Welcome back!`);
-    navigate(selectedRole === "owner" ? "/owner/dashboard" : "/tenant/dashboard");
+
+    try {
+      setLoading(true);
+      
+      const validated = loginSchema.parse({
+        email: loginEmail,
+        password: loginPassword,
+      });
+
+      const { error } = await signIn(validated.email, validated.password);
+
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          toast.error("Invalid email or password");
+        } else {
+          toast.error(error.message || "Failed to sign in");
+        }
+        return;
+      }
+
+      toast.success("Welcome back!");
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      } else {
+        toast.error("An error occurred during login");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (!selectedRole) {
       toast.error("Please select your role first");
       return;
     }
-    toast.success("Account created successfully!");
-    navigate(selectedRole === "owner" ? "/owner/dashboard" : "/tenant/dashboard");
+
+    try {
+      setLoading(true);
+
+      const validated = signupSchema.parse({
+        fullName: signupName,
+        phone: signupPhone,
+        email: signupEmail,
+        password: signupPassword,
+      });
+
+      const { error } = await signUp(
+        validated.email,
+        validated.password,
+        validated.fullName,
+        validated.phone,
+        selectedRole
+      );
+
+      if (error) {
+        if (error.message.includes("already registered")) {
+          toast.error("This email is already registered");
+        } else {
+          toast.error(error.message || "Failed to create account");
+        }
+        return;
+      }
+
+      toast.success("Account created successfully!");
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      } else {
+        toast.error("An error occurred during signup");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -111,6 +218,9 @@ const Auth = () => {
                       type="email"
                       placeholder="your@email.com"
                       className="pl-10"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -123,14 +233,18 @@ const Auth = () => {
                       type="password"
                       placeholder="••••••••"
                       className="pl-10"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      disabled={loading}
                     />
                   </div>
                 </div>
                 <Button
                   onClick={handleLogin}
+                  disabled={loading}
                   className="w-full gradient-primary text-white font-semibold py-6 rounded-xl shadow-glow hover:shadow-medium transition-all hover:scale-105 group"
                 >
-                  Login
+                  {loading ? "Signing in..." : "Login"}
                   <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </TabsContent>
@@ -145,6 +259,9 @@ const Auth = () => {
                       type="text"
                       placeholder="John Doe"
                       className="pl-10"
+                      value={signupName}
+                      onChange={(e) => setSignupName(e.target.value)}
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -157,6 +274,9 @@ const Auth = () => {
                       type="tel"
                       placeholder="+1 234 567 8900"
                       className="pl-10"
+                      value={signupPhone}
+                      onChange={(e) => setSignupPhone(e.target.value)}
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -169,6 +289,9 @@ const Auth = () => {
                       type="email"
                       placeholder="your@email.com"
                       className="pl-10"
+                      value={signupEmail}
+                      onChange={(e) => setSignupEmail(e.target.value)}
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -181,14 +304,18 @@ const Auth = () => {
                       type="password"
                       placeholder="••••••••"
                       className="pl-10"
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
+                      disabled={loading}
                     />
                   </div>
                 </div>
                 <Button
                   onClick={handleSignup}
+                  disabled={loading}
                   className="w-full gradient-primary text-white font-semibold py-6 rounded-xl shadow-glow hover:shadow-medium transition-all hover:scale-105 group"
                 >
-                  Create Account
+                  {loading ? "Creating account..." : "Create Account"}
                   <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </TabsContent>

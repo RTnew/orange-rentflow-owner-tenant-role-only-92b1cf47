@@ -2,11 +2,14 @@ import { ArrowLeft, User, Mail, Phone, Home, LogOut, Settings } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOut();
     toast.success("Logged out successfully!");
     navigate("/auth");
   };
