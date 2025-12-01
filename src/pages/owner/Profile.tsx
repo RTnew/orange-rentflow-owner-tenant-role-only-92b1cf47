@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const smsSchema = z.object({
   phoneNumber: z.string()
@@ -33,12 +35,47 @@ const mockTenants = [
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const [selectedTenant, setSelectedTenant] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [smsMessage, setSmsMessage] = useState("Dear Tenant, your rent is due soon. Please make the payment by the due date. Thank you!");
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return document.documentElement.classList.contains("dark");
+  });
+
+  // Fetch user profile data
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch properties count
+  const { data: propertiesCount } = useQuery({
+    queryKey: ["properties-count", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return 0;
+      
+      const { count, error } = await supabase
+        .from("properties")
+        .select("*", { count: "exact", head: true })
+        .eq("owner_id", user.id);
+
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!user?.id,
   });
 
   useEffect(() => {
@@ -117,37 +154,45 @@ const Profile = () => {
         <div className="glass-card rounded-2xl p-6 shadow-medium space-y-4">
           <h3 className="font-semibold mb-3">Personal Information</h3>
           
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-            <User className="h-5 w-5 text-primary" />
-            <div>
-              <p className="text-xs text-muted-foreground">Full Name</p>
-              <p className="font-medium">John Doe</p>
+          {profileLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                <User className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Full Name</p>
+                  <p className="font-medium">{profile?.full_name || "Not set"}</p>
+                </div>
+              </div>
 
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-            <Mail className="h-5 w-5 text-primary" />
-            <div>
-              <p className="text-xs text-muted-foreground">Email</p>
-              <p className="font-medium">john.doe@email.com</p>
-            </div>
-          </div>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                <Mail className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="font-medium">{profile?.email || user?.email || "Not set"}</p>
+                </div>
+              </div>
 
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-            <Phone className="h-5 w-5 text-primary" />
-            <div>
-              <p className="text-xs text-muted-foreground">Phone</p>
-              <p className="font-medium">+1 234 567 8900</p>
-            </div>
-          </div>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                <Phone className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Phone</p>
+                  <p className="font-medium">{profile?.phone || "Not set"}</p>
+                </div>
+              </div>
 
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-            <Building2 className="h-5 w-5 text-primary" />
-            <div>
-              <p className="text-xs text-muted-foreground">Properties</p>
-              <p className="font-medium">3 Properties</p>
-            </div>
-          </div>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                <Building2 className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Properties</p>
+                  <p className="font-medium">{propertiesCount} {propertiesCount === 1 ? "Property" : "Properties"}</p>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="glass-card rounded-2xl p-6 shadow-medium space-y-4">

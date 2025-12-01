@@ -3,10 +3,30 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
+
+  // Fetch user profile data
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
   const handleLogout = async () => {
     await signOut();
@@ -35,37 +55,45 @@ const Profile = () => {
         <div className="glass-card rounded-2xl p-6 shadow-medium space-y-4">
           <h3 className="font-semibold mb-3">Personal Information</h3>
           
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-            <User className="h-5 w-5 text-primary" />
-            <div>
-              <p className="text-xs text-muted-foreground">Full Name</p>
-              <p className="font-medium">Tenant Name</p>
+          {profileLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                <User className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Full Name</p>
+                  <p className="font-medium">{profile?.full_name || "Not set"}</p>
+                </div>
+              </div>
 
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-            <Mail className="h-5 w-5 text-primary" />
-            <div>
-              <p className="text-xs text-muted-foreground">Email</p>
-              <p className="font-medium">tenant@email.com</p>
-            </div>
-          </div>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                <Mail className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="font-medium">{profile?.email || user?.email || "Not set"}</p>
+                </div>
+              </div>
 
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-            <Phone className="h-5 w-5 text-primary" />
-            <div>
-              <p className="text-xs text-muted-foreground">Phone</p>
-              <p className="font-medium">+1 234 567 8900</p>
-            </div>
-          </div>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                <Phone className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Phone</p>
+                  <p className="font-medium">{profile?.phone || "Not set"}</p>
+                </div>
+              </div>
 
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-            <Home className="h-5 w-5 text-primary" />
-            <div>
-              <p className="text-xs text-muted-foreground">Property</p>
-              <p className="font-medium">Apartment 101</p>
-            </div>
-          </div>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                <Home className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Property</p>
+                  <p className="font-medium">Not assigned</p>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="glass-card rounded-2xl p-4 shadow-medium">
