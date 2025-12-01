@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { RoleProtectedRoute } from "@/components/RoleProtectedRoute";
 import Splash from "./pages/Splash";
 import Auth from "./pages/Auth";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
@@ -46,25 +48,31 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Splash />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/owner/dashboard" element={<OwnerDashboard />} />
-          <Route path="/owner/add-property" element={<AddProperty />} />
-          <Route path="/owner/properties" element={<Properties />} />
-          <Route path="/owner/property/:id" element={<PropertyDetails />} />
-          <Route path="/owner/list-property" element={<ListProperty />} />
-          <Route path="/owner/add-tenant" element={<AddTenant />} />
-          <Route path="/owner/tenants" element={<Tenants />} />
-          <Route path="/owner/finance" element={<Finance />} />
-          <Route path="/owner/reports" element={<Reports />} />
-          <Route path="/owner/profile" element={<OwnerProfile />} />
-          <Route path="/tenant/dashboard" element={<TenantDashboard />} />
-          <Route path="/tenant/browse-properties" element={<BrowseProperties />} />
-          <Route path="/tenant/payments" element={<Payments />} />
-          <Route path="/tenant/agreement" element={<Agreement />} />
-          <Route path="/tenant/schedule" element={<Schedule />} />
-          <Route path="/tenant/receipts" element={<Receipts />} />
-          <Route path="/tenant/documents" element={<Documents />} />
-          <Route path="/tenant/profile" element={<TenantProfile />} />
-          <Route path="/admin" element={<AdminLayout />}>
+          
+          {/* Owner Routes - Protected */}
+          <Route path="/owner/dashboard" element={<RoleProtectedRoute allowedRoles={["owner"]}><OwnerDashboard /></RoleProtectedRoute>} />
+          <Route path="/owner/add-property" element={<RoleProtectedRoute allowedRoles={["owner"]}><AddProperty /></RoleProtectedRoute>} />
+          <Route path="/owner/properties" element={<RoleProtectedRoute allowedRoles={["owner"]}><Properties /></RoleProtectedRoute>} />
+          <Route path="/owner/property/:id" element={<RoleProtectedRoute allowedRoles={["owner"]}><PropertyDetails /></RoleProtectedRoute>} />
+          <Route path="/owner/list-property" element={<RoleProtectedRoute allowedRoles={["owner"]}><ListProperty /></RoleProtectedRoute>} />
+          <Route path="/owner/add-tenant" element={<RoleProtectedRoute allowedRoles={["owner"]}><AddTenant /></RoleProtectedRoute>} />
+          <Route path="/owner/tenants" element={<RoleProtectedRoute allowedRoles={["owner"]}><Tenants /></RoleProtectedRoute>} />
+          <Route path="/owner/finance" element={<RoleProtectedRoute allowedRoles={["owner"]}><Finance /></RoleProtectedRoute>} />
+          <Route path="/owner/reports" element={<RoleProtectedRoute allowedRoles={["owner"]}><Reports /></RoleProtectedRoute>} />
+          <Route path="/owner/profile" element={<RoleProtectedRoute allowedRoles={["owner"]}><OwnerProfile /></RoleProtectedRoute>} />
+          
+          {/* Tenant Routes - Protected */}
+          <Route path="/tenant/dashboard" element={<RoleProtectedRoute allowedRoles={["tenant"]}><TenantDashboard /></RoleProtectedRoute>} />
+          <Route path="/tenant/browse-properties" element={<RoleProtectedRoute allowedRoles={["tenant"]}><BrowseProperties /></RoleProtectedRoute>} />
+          <Route path="/tenant/payments" element={<RoleProtectedRoute allowedRoles={["tenant"]}><Payments /></RoleProtectedRoute>} />
+          <Route path="/tenant/agreement" element={<RoleProtectedRoute allowedRoles={["tenant"]}><Agreement /></RoleProtectedRoute>} />
+          <Route path="/tenant/schedule" element={<RoleProtectedRoute allowedRoles={["tenant"]}><Schedule /></RoleProtectedRoute>} />
+          <Route path="/tenant/receipts" element={<RoleProtectedRoute allowedRoles={["tenant"]}><Receipts /></RoleProtectedRoute>} />
+          <Route path="/tenant/documents" element={<RoleProtectedRoute allowedRoles={["tenant"]}><Documents /></RoleProtectedRoute>} />
+          <Route path="/tenant/profile" element={<RoleProtectedRoute allowedRoles={["tenant"]}><TenantProfile /></RoleProtectedRoute>} />
+          
+          {/* Admin Routes - Protected */}
+          <Route path="/admin" element={<RoleProtectedRoute allowedRoles={["admin"]}><AdminLayout /></RoleProtectedRoute>}>
             <Route index element={<AdminDashboard />} />
             <Route path="banners" element={<BannersList />} />
             <Route path="banners/add" element={<BannerForm />} />
@@ -77,6 +85,7 @@ const App = () => (
             <Route path="reports" element={<AdminReports />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { z } from "zod";
+import { useAuth } from "@/contexts/AuthContext";
 
 const smsSchema = z.object({
   phoneNumber: z.string()
@@ -32,6 +33,7 @@ const mockTenants = [
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [selectedTenant, setSelectedTenant] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [smsMessage, setSmsMessage] = useState("Dear Tenant, your rent is due soon. Please make the payment by the due date. Thank you!");
@@ -61,7 +63,8 @@ const Profile = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOut();
     toast.success("Logged out successfully!");
     navigate("/auth");
   };
