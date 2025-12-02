@@ -7,10 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+const PLACEMENT_OPTIONS = [
+  { value: "upper_banner", label: "Upper Banner (Hero Section)" },
+  { value: "down_banner", label: "Down Banner (Below Services)" },
+];
 export default function BannerForm() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -154,13 +159,25 @@ export default function BannerForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                placeholder="Enter location"
+              <Label>Ad Placement</Label>
+              <Select
                 value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              />
+                onValueChange={(value) => setFormData({ ...formData, location: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select where to place the ad" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PLACEMENT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Upper Banner: Shows at the top of the dashboard. Down Banner: Shows below the services section.
+              </p>
             </div>
 
             <div className="space-y-2">
