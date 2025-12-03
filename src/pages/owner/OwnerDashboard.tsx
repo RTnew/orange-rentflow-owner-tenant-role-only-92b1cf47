@@ -4,9 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Carousel, CarouselContent, CarouselItem, CarouselApi } from "@/components/ui/carousel";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [bannerApi, setBannerApi] = useState<CarouselApi>();
   const [serviceApi, setServiceApi] = useState<CarouselApi>();
   const [currentBanner, setCurrentBanner] = useState(0);
@@ -28,75 +32,119 @@ const OwnerDashboard = () => {
     });
   }, [serviceApi]);
 
+  // Fetch user profile
+  const { data: profile } = useQuery({
+    queryKey: ["owner-profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch owner's properties
+  const { data: properties } = useQuery({
+    queryKey: ["owner-properties", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("owner_id", user.id)
+        .order("created_at", { ascending: false });
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch banners for owner role
+  const { data: banners } = useQuery({
+    queryKey: ["owner-banners"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("banners")
+        .select("*")
+        .eq("is_active", true)
+        .contains("roles", ["owner"])
+        .order("order_index", { ascending: true });
+      return data || [];
+    },
+  });
+
+  // Fetch services for owner role
+  const { data: services } = useQuery({
+    queryKey: ["owner-services"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("services")
+        .select("*")
+        .eq("is_active", true)
+        .contains("roles", ["owner"])
+        .order("order_index", { ascending: true });
+      return data || [];
+    },
+  });
+
+  const totalRent = properties?.reduce((sum, p) => sum + (p.rent_amount || 0), 0) || 0;
+  const listedCount = properties?.filter(p => p.status === "listed").length || 0;
+  const vacantCount = properties?.filter(p => p.status === "vacant").length || 0;
+
   const stats = [
     {
       title: "Total Properties",
-      value: "12",
+      value: properties?.length?.toString() || "0",
       icon: Building2,
-      change: "+2 this month",
+      change: `${listedCount} listed`,
       color: "text-primary",
     },
     {
-      title: "Rent Collected",
-      value: "₹4,52,300",
+      title: "Total Monthly Rent",
+      value: `₹${totalRent.toLocaleString("en-IN")}`,
       icon: DollarSign,
-      change: "+12% from last month",
+      change: "all properties",
       color: "text-green-500",
     },
     {
-      title: "Pending Payments",
-      value: "₹84,000",
+      title: "Vacant Properties",
+      value: vacantCount.toString(),
       icon: AlertCircle,
-      change: "5 tenants",
+      change: "available",
       color: "text-orange-500",
     },
     {
-      title: "This Month",
-      value: "₹1,28,400",
+      title: "Listed Properties",
+      value: listedCount.toString(),
       icon: TrendingUp,
-      change: "+8% growth",
+      change: "on marketplace",
       color: "text-primary",
     },
   ];
 
-  const recentProperties = [
-    { name: "Sunset Apartments 304", rent: "₹12,000", status: "Paid", tenant: "John Smith" },
-    { name: "Downtown Loft 12B", rent: "₹24,000", status: "Pending", tenant: "Sarah Johnson" },
-    { name: "Garden View Villa", rent: "₹32,000", status: "Paid", tenant: "Mike Brown" },
+  const recentProperties = properties?.slice(0, 3) || [];
+
+  // Group services into pages of 2
+  const servicePages = [];
+  const servicesList = services || [];
+  for (let i = 0; i < servicesList.length; i += 2) {
+    servicePages.push({
+      id: i,
+      cards: servicesList.slice(i, i + 2),
+    });
+  }
+
+  const bannerColors = [
+    "from-orange-400 to-orange-500",
+    "from-blue-400 to-blue-500",
+    "from-purple-400 to-purple-500",
+    "from-green-400 to-green-500",
   ];
 
-  const bannerAds = [
-    { id: 1, title: "FLAT FOR SALE", subtitle: "2 BHK", location: "in Koramangala", icon: "🏢", bg: "from-orange-400 to-orange-500" },
-    { id: 2, title: "VILLA FOR RENT", subtitle: "3 BHK", location: "in Whitefield", icon: "🏡", bg: "from-blue-400 to-blue-500" },
-    { id: 3, title: "OFFICE SPACE", subtitle: "1500 sqft", location: "in HSR Layout", icon: "🏢", bg: "from-purple-400 to-purple-500" },
-    { id: 4, title: "PREMIUM FLAT", subtitle: "4 BHK", location: "in Indiranagar", icon: "🏠", bg: "from-green-400 to-green-500" },
-  ];
-
-  const servicePages = [
-    {
-      id: 1,
-      cards: [
-        { title: "Packers & Movers", icon: "🔧", bg: "bg-emerald-700" },
-        { title: "Top-rated agent", icon: "👤", bg: "bg-slate-600" }
-      ]
-    },
-    {
-      id: 2,
-      cards: [
-        { title: "AC Service", icon: "❄️", bg: "bg-blue-700" },
-        { title: "Plumber Service", icon: "💡", bg: "bg-purple-600" }
-      ]
-    },
-    {
-      id: 3,
-      cards: [
-        { title: "Electrician", icon: "⚡", bg: "bg-orange-600" },
-        { title: "Cleaning Service", icon: "🧹", bg: "bg-teal-600" }
-      ]
-    }
-  ];
-
-  const handleBannerClick = (banner: typeof bannerAds[0]) => {
+  const handleBannerClick = (banner: any) => {
     toast.info(`Opening ${banner.title} details`);
   };
 
@@ -114,7 +162,7 @@ const OwnerDashboard = () => {
       <div className="gradient-primary p-6 text-white pb-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Welcome back, Owner</h1>
+            <h1 className="text-3xl font-bold">Welcome back, {profile?.full_name || "Owner"}</h1>
             <p className="text-white/90 text-base mt-2">Here's your property overview</p>
           </div>
           <Button
@@ -127,77 +175,103 @@ const OwnerDashboard = () => {
         </div>
 
         {/* Hero Carousel */}
-        <Carousel className="mb-2" setApi={setBannerApi}>
-          <CarouselContent>
-            {bannerAds.map((banner) => (
-              <CarouselItem key={banner.id}>
-                <div 
-                  className={`bg-gradient-to-br ${banner.bg} rounded-3xl p-6 shadow-glow cursor-pointer transition-transform hover:scale-[0.98] active:scale-95`}
-                  onClick={() => handleBannerClick(banner)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-2xl font-bold text-black mb-1">{banner.title}</h2>
-                      <h3 className="text-3xl font-bold text-black">{banner.subtitle}</h3>
-                      <p className="text-lg font-semibold text-black/80 mt-1">{banner.location}</p>
+        {banners && banners.length > 0 ? (
+          <>
+            <Carousel className="mb-2" setApi={setBannerApi}>
+              <CarouselContent>
+                {banners.map((banner, index) => (
+                  <CarouselItem key={banner.id}>
+                    <div 
+                      className={`bg-gradient-to-br ${bannerColors[index % bannerColors.length]} rounded-3xl p-6 shadow-glow cursor-pointer transition-transform hover:scale-[0.98] active:scale-95`}
+                      onClick={() => handleBannerClick(banner)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h2 className="text-2xl font-bold text-black mb-1">{banner.title}</h2>
+                          <h3 className="text-xl font-bold text-black">{banner.subtitle}</h3>
+                          {banner.location && (
+                            <p className="text-lg font-semibold text-black/80 mt-1">📍 {banner.location}</p>
+                          )}
+                        </div>
+                        {banner.image_url ? (
+                          <img src={banner.image_url} alt={banner.title} className="w-16 h-16 rounded-xl object-cover" />
+                        ) : (
+                          <div className="text-6xl">🏢</div>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-6xl">{banner.icon}</div>
-                  </div>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-        
-        {/* Banner Pagination Dots */}
-        <div className="flex justify-center gap-2 mb-6">
-          {bannerAds.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => scrollToBanner(index)}
-              className={`h-2 rounded-full transition-all ${
-                currentBanner === index ? "w-8 bg-white" : "w-2 bg-white/40"
-              }`}
-              aria-label={`Go to banner ${index + 1}`}
-            />
-          ))}
-        </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+            
+            {/* Banner Pagination Dots */}
+            <div className="flex justify-center gap-2 mb-6">
+              {banners.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToBanner(index)}
+                  className={`h-2 rounded-full transition-all ${
+                    currentBanner === index ? "w-8 bg-white" : "w-2 bg-white/40"
+                  }`}
+                  aria-label={`Go to banner ${index + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="bg-white/10 rounded-3xl p-6 text-center mb-6">
+            <p className="text-white/80">No banners available</p>
+          </div>
+        )}
 
         {/* Service Cards Carousel */}
-        <Carousel className="mb-2" setApi={setServiceApi}>
-          <CarouselContent>
-            {servicePages.map((page) => (
-              <CarouselItem key={page.id}>
-                <div className="grid grid-cols-2 gap-4">
-                  {page.cards.map((card, idx) => (
-                    <div 
-                      key={idx}
-                      className={`${card.bg} rounded-3xl p-6 shadow-medium flex flex-col items-center justify-center text-center cursor-pointer transition-transform hover:scale-[0.98] active:scale-95 h-32`}
-                      onClick={() => toast.info(`Opening ${card.title}`)}
-                    >
-                      <div className="text-4xl mb-2">{card.icon}</div>
-                      <p className="text-white font-semibold text-sm">{card.title}</p>
+        {servicePages.length > 0 ? (
+          <>
+            <Carousel className="mb-2" setApi={setServiceApi}>
+              <CarouselContent>
+                {servicePages.map((page) => (
+                  <CarouselItem key={page.id}>
+                    <div className="grid grid-cols-2 gap-4">
+                      {page.cards.map((card: any) => (
+                        <div 
+                          key={card.id}
+                          className="bg-emerald-700 rounded-3xl p-6 shadow-medium flex flex-col items-center justify-center text-center cursor-pointer transition-transform hover:scale-[0.98] active:scale-95 h-32"
+                          onClick={() => toast.info(`Opening ${card.title}`)}
+                        >
+                          {card.icon_url ? (
+                            <img src={card.icon_url} alt={card.title} className="w-10 h-10 mb-2" />
+                          ) : (
+                            <div className="text-4xl mb-2">🔧</div>
+                          )}
+                          <p className="text-white font-semibold text-sm">{card.title}</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
 
-        {/* Service Pagination Dots */}
-        <div className="flex justify-center gap-2">
-          {servicePages.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => scrollToService(index)}
-              className={`h-2 rounded-full transition-all ${
-                currentService === index ? "w-8 bg-white" : "w-2 bg-white/40"
-              }`}
-              aria-label={`Go to service page ${index + 1}`}
-            />
-          ))}
-        </div>
+            {/* Service Pagination Dots */}
+            <div className="flex justify-center gap-2">
+              {servicePages.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToService(index)}
+                  className={`h-2 rounded-full transition-all ${
+                    currentService === index ? "w-8 bg-white" : "w-2 bg-white/40"
+                  }`}
+                  aria-label={`Go to service page ${index + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="bg-white/10 rounded-3xl p-6 text-center">
+            <p className="text-white/80">No services available</p>
+          </div>
+        )}
       </div>
 
       {/* Quick Actions */}
@@ -259,29 +333,48 @@ const OwnerDashboard = () => {
           </div>
 
           <div className="space-y-3">
-            {recentProperties.map((property, index) => (
-              <div
-                key={index}
-                className="bg-card rounded-2xl p-4 hover:shadow-medium transition-all shadow-soft border border-border"
-                onClick={() => navigate(`/owner/property/${index + 1}`)}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-base mb-1">{property.name}</h3>
-                    <p className="text-sm text-muted-foreground">{property.tenant}</p>
-                  </div>
-                  <div
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
-                      property.status === "Paid"
-                        ? "bg-green-400 text-green-900"
-                        : "bg-orange-100 text-orange-700"
-                    }`}
-                  >
-                    {property.status}
+            {recentProperties.length > 0 ? (
+              recentProperties.map((property) => (
+                <div
+                  key={property.id}
+                  className="bg-card rounded-2xl p-4 hover:shadow-medium transition-all shadow-soft border border-border"
+                  onClick={() => navigate(`/owner/property/${property.id}`)}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-base mb-1">{property.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {property.city}{property.state ? `, ${property.state}` : ""}
+                      </p>
+                      <p className="text-sm font-medium text-primary mt-1">
+                        ₹{(property.rent_amount || 0).toLocaleString("en-IN")}/month
+                      </p>
+                    </div>
+                    <div
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize ${
+                        property.status === "listed"
+                          ? "bg-green-400 text-green-900"
+                          : property.status === "occupied"
+                          ? "bg-blue-400 text-blue-900"
+                          : "bg-orange-100 text-orange-700"
+                      }`}
+                    >
+                      {property.status || "vacant"}
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="bg-card rounded-2xl p-6 text-center border border-border">
+                <p className="text-muted-foreground">No properties yet</p>
+                <Button 
+                  className="mt-4"
+                  onClick={() => navigate("/owner/add-property")}
+                >
+                  Add Your First Property
+                </Button>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
