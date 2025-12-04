@@ -1,16 +1,39 @@
-import { ArrowLeft, Receipt, Download } from "lucide-react";
+import { ArrowLeft, Receipt, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Receipts = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const receipts = [
-    { id: "REC001", month: "December 2024", amount: "₹1,200", date: "Dec 1, 2024", method: "UPI" },
-    { id: "REC002", month: "November 2024", amount: "₹1,200", date: "Nov 1, 2024", method: "Card" },
-    { id: "REC003", month: "October 2024", amount: "₹1,200", date: "Oct 1, 2024", method: "UPI" },
-  ];
+  const { data: receipts = [], isLoading } = useQuery({
+    queryKey: ["tenant-receipts", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from("payments")
+        .select("*")
+        .eq("tenant_id", user.id)
+        .eq("status", "completed")
+        .order("payment_date", { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-muted flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-muted pb-20">
@@ -23,39 +46,48 @@ const Receipts = () => {
       </div>
 
       <div className="px-6 mt-6 space-y-3">
-        {receipts.map((receipt) => (
-          <div key={receipt.id} className="glass-card rounded-2xl p-4 shadow-medium">
-            <div className="flex items-start gap-4">
-              <div className="glass-card p-3 rounded-xl bg-green-50">
-                <Receipt className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <h3 className="font-semibold">{receipt.month}</h3>
-                    <p className="text-xs text-muted-foreground">Receipt #{receipt.id}</p>
-                  </div>
-                  <p className="text-lg font-bold text-primary">{receipt.amount}</p>
+        {receipts.length === 0 ? (
+          <div className="glass-card rounded-2xl p-8 text-center">
+            <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground">No payment receipts yet</p>
+          </div>
+        ) : (
+          receipts.map((receipt) => (
+            <div key={receipt.id} className="glass-card rounded-2xl p-4 shadow-medium">
+              <div className="flex items-start gap-4">
+                <div className="glass-card p-3 rounded-xl bg-green-50">
+                  <Receipt className="h-6 w-6 text-green-600" />
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-muted-foreground">{receipt.date}</p>
-                    <p className="text-xs text-muted-foreground">via {receipt.method}</p>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h3 className="font-semibold">{receipt.month_year || "Payment"}</h3>
+                      <p className="text-xs text-muted-foreground">Receipt #{receipt.receipt_id || receipt.id.slice(0, 8)}</p>
+                    </div>
+                    <p className="text-lg font-bold text-primary">₹{receipt.amount}</p>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => toast.success(`Downloading receipt ${receipt.id}...`)}
-                    className="rounded-lg"
-                  >
-                    <Download className="h-3 w-3 mr-1" />
-                    PDF
-                  </Button>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(receipt.payment_date).toLocaleDateString()}
+                      </p>
+                      <p className="text-xs text-muted-foreground">via {receipt.payment_method || "N/A"}</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => toast.success(`Downloading receipt ${receipt.receipt_id || receipt.id.slice(0, 8)}...`)}
+                      className="rounded-lg"
+                    >
+                      <Download className="h-3 w-3 mr-1" />
+                      PDF
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

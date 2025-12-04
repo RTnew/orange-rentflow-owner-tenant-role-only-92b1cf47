@@ -1,60 +1,70 @@
-import { ArrowLeft, Home, MapPin, Phone, Calendar, X, Search } from "lucide-react";
+import { ArrowLeft, Home, MapPin, Phone, Calendar, X, Search, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const BrowseProperties = () => {
   const navigate = useNavigate();
   const [searchLocation, setSearchLocation] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Mock listed properties
-  const listedProperties = [
-    {
-      id: 1,
-      name: "Apartment 101",
-      address: "123 Main St, Downtown",
-      location: "Downtown",
-      rent: 1200,
-      deposit: 2400,
-      description: "Spacious 2BHK apartment with modern amenities. Close to metro station and shopping centers.",
-      amenities: "WiFi, Parking, Gym, AC, Power Backup",
-      availableFrom: "2025-01-15",
-      contactNumber: "+91 98765 43210",
-      owner: "John Doe",
-      images: ["/placeholder.svg"],
+  const { data: listedProperties = [], isLoading } = useQuery({
+    queryKey: ["listed-properties"],
+    queryFn: async () => {
+      const { data: properties, error } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("status", "listed");
+
+      if (error) throw error;
+      
+      // Fetch owner profiles for each property
+      const ownerIds = [...new Set((properties || []).map(p => p.owner_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, full_name, phone")
+        .in("id", ownerIds);
+      
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      
+      return (properties || []).map(p => ({
+        ...p,
+        owner_profile: profileMap.get(p.owner_id) || null
+      }));
     },
-    {
-      id: 2,
-      name: "Studio 3B",
-      address: "789 Elm St, Suburb Area",
-      location: "Suburb Area",
-      rent: 950,
-      deposit: 1900,
-      description: "Cozy studio apartment perfect for single professionals. Quiet neighborhood with good connectivity.",
-      amenities: "WiFi, Parking, AC, Security",
-      availableFrom: "2025-01-01",
-      contactNumber: "+91 87654 32109",
-      owner: "Jane Smith",
-      images: ["/placeholder.svg"],
-    },
-  ];
+  });
 
   // Filter properties by location
   const filteredProperties = listedProperties.filter((property) =>
-    property.location.toLowerCase().includes(searchLocation.toLowerCase()) ||
-    property.address.toLowerCase().includes(searchLocation.toLowerCase())
+    (property.city?.toLowerCase() || "").includes(searchLocation.toLowerCase()) ||
+    (property.address?.toLowerCase() || "").includes(searchLocation.toLowerCase()) ||
+    (property.state?.toLowerCase() || "").includes(searchLocation.toLowerCase())
   );
 
-  const handleContact = (property: typeof listedProperties[0]) => {
+  const handleContact = (property: any) => {
+    const phone = property.owner_profile?.phone || "";
+    if (!phone) {
+      toast.error("Owner contact not available");
+      return;
+    }
     const message = `Hi, I'm interested in ${property.name} at ${property.address}. Is it still available?`;
     const encodedMessage = encodeURIComponent(message);
-    const cleanNumber = property.contactNumber.replace(/[^0-9]/g, "");
+    const cleanNumber = phone.replace(/[^0-9]/g, "");
     window.location.href = `sms:${cleanNumber}?body=${encodedMessage}`;
     toast.success("Opening SMS to contact owner");
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-muted flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-muted pb-20">
@@ -95,10 +105,10 @@ const BrowseProperties = () => {
             {/* Property Image */}
             <div 
               className="w-full h-48 bg-muted rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => setSelectedImage(property.images[0])}
+              onClick={() => property.images?.[0] && setSelectedImage(property.images[0])}
             >
               <img
-                src={property.images[0]}
+                src={property.images?.[0] || "/placeholder.svg"}
                 alt={property.name}
                 className="w-full h-full object-cover"
               />
@@ -113,39 +123,34 @@ const BrowseProperties = () => {
                 <h3 className="font-semibold text-lg mb-1">{property.name}</h3>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
                   <MapPin className="h-3 w-3" />
-                  {property.address}
+                  {property.address}, {property.city}
                 </div>
               </div>
             </div>
 
             {/* Description */}
-            <p className="text-sm text-muted-foreground">{property.description}</p>
+            {property.description && (
+              <p className="text-sm text-muted-foreground">{property.description}</p>
+            )}
 
-            {/* Amenities */}
-            <div className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground">Amenities</p>
-              <p className="text-sm">{property.amenities}</p>
-            </div>
+            {/* Property Type */}
+            {property.property_type && (
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground">Type</p>
+                <p className="text-sm capitalize">{property.property_type}</p>
+              </div>
+            )}
 
             {/* Details Grid */}
             <div className="grid grid-cols-2 gap-4">
               <div className="glass-card p-3 rounded-xl">
                 <p className="text-xs text-muted-foreground mb-1">Monthly Rent</p>
-                <p className="text-xl font-bold text-primary">₹{property.rent}</p>
+                <p className="text-xl font-bold text-primary">₹{property.rent_amount || 0}</p>
               </div>
               <div className="glass-card p-3 rounded-xl">
-                <p className="text-xs text-muted-foreground mb-1">Deposit</p>
-                <p className="text-xl font-bold text-primary">₹{property.deposit}</p>
+                <p className="text-xs text-muted-foreground mb-1">Owner</p>
+                <p className="text-sm font-medium">{property.owner_profile?.full_name || "N/A"}</p>
               </div>
-            </div>
-
-            {/* Available From */}
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Available from:</span>
-              <span className="font-medium">
-                {new Date(property.availableFrom).toLocaleDateString()}
-              </span>
             </div>
 
             {/* Contact Button */}
