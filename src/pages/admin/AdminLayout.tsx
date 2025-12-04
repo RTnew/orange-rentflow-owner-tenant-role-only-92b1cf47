@@ -10,7 +10,9 @@ import {
   Settings,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +30,12 @@ export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/auth", { replace: true });
+  };
 
   const isActive = (path: string) => {
     if (path === "/admin") {
@@ -41,7 +49,7 @@ export default function AdminLayout() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen transition-all duration-300 border-r border-border bg-card",
+          "fixed left-0 top-0 z-40 h-screen transition-all duration-300 border-r border-border bg-card flex flex-col",
           collapsed ? "w-16" : "w-64"
         )}
       >
@@ -61,7 +69,7 @@ export default function AdminLayout() {
         </div>
 
         {/* Menu Items */}
-        <nav className="flex flex-col gap-1 p-2">
+        <nav className="flex flex-col gap-1 p-2 flex-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -82,6 +90,21 @@ export default function AdminLayout() {
             );
           })}
         </nav>
+
+        {/* Logout Button */}
+        <div className="p-2 border-t border-border">
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10",
+              collapsed ? "px-2" : "px-4"
+            )}
+            onClick={handleLogout}
+          >
+            <LogOut className={cn("h-5 w-5", !collapsed && "mr-3")} />
+            {!collapsed && <span>Logout</span>}
+          </Button>
+        </div>
       </aside>
 
       {/* Main Content */}
