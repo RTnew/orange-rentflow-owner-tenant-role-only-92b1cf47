@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Mail, Lock, User, Phone, ArrowRight } from "lucide-react";
+import { Mail, Lock, User, Phone, ArrowRight, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { z } from "zod";
+import logo from "@/assets/logo.png";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -147,8 +148,8 @@ const Auth = () => {
       <div className="relative z-10 w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center glass-card p-4 rounded-2xl shadow-glow mb-4">
-            <Building2 className="w-12 h-12 text-primary" />
+          <div className="inline-flex items-center justify-center mb-4">
+            <img src={logo} alt="RentTrack Logo" className="w-24 h-24 object-contain" />
           </div>
           <h1 className="text-3xl font-bold">
             Rent<span className="text-primary">Track</span>

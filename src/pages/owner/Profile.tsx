@@ -1,13 +1,12 @@
-import { ArrowLeft, User, Mail, Phone, Building2, LogOut, Settings, MessageSquare, Send, Users, Moon, Sun } from "lucide-react";
+import { ArrowLeft, User, Mail, Phone, Building2, LogOut, Settings, MessageSquare, Send, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -25,23 +24,12 @@ const smsSchema = z.object({
     .max(500, "Message must be less than 500 characters")
 });
 
-// Mock tenant data - will be replaced with real data from backend
-const mockTenants = [
-  { id: "1", name: "John Smith", phone: "+1 234 567 8901", property: "Apartment 101" },
-  { id: "2", name: "Sarah Johnson", phone: "+1 234 567 8902", property: "Villa A" },
-  { id: "3", name: "Michael Brown", phone: "+1 234 567 8903", property: "Apartment 205" },
-  { id: "4", name: "Emily Davis", phone: "+1 234 567 8904", property: "House 15" },
-];
-
 const Profile = () => {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
   const [selectedTenant, setSelectedTenant] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [smsMessage, setSmsMessage] = useState("Dear Tenant, your rent is due soon. Please make the payment by the due date. Thank you!");
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    return document.documentElement.classList.contains("dark");
-  });
 
   // Fetch user profile data
   const { data: profile, isLoading: profileLoading } = useQuery({
@@ -78,22 +66,59 @@ const Profile = () => {
     enabled: !!user?.id,
   });
 
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDarkMode]);
+  // Fetch assigned tenants with their properties
+  const { data: assignedTenants, isLoading: tenantsLoading } = useQuery({
+    queryKey: ["assigned-tenants", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      
+      // First get properties owned by this user
+      const { data: properties, error: propError } = await supabase
+        .from("properties")
+        .select("id, name")
+        .eq("owner_id", user.id);
 
-  const handleDarkModeToggle = (checked: boolean) => {
-    setIsDarkMode(checked);
-    toast.success(`Dark mode ${checked ? "enabled" : "disabled"}`);
-  };
+      if (propError) throw propError;
+      if (!properties || properties.length === 0) return [];
+
+      const propertyIds = properties.map(p => p.id);
+
+      // Get tenant assignments for these properties
+      const { data: assignments, error: assignError } = await supabase
+        .from("tenant_assignments")
+        .select("tenant_id, property_id")
+        .in("property_id", propertyIds);
+
+      if (assignError) throw assignError;
+      if (!assignments || assignments.length === 0) return [];
+
+      // Get tenant profiles
+      const tenantIds = assignments.map(a => a.tenant_id);
+      const { data: profiles, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, full_name, phone")
+        .in("id", tenantIds);
+
+      if (profileError) throw profileError;
+
+      // Combine the data
+      return assignments.map(assignment => {
+        const profile = profiles?.find(p => p.id === assignment.tenant_id);
+        const property = properties?.find(p => p.id === assignment.property_id);
+        return {
+          id: assignment.tenant_id,
+          name: profile?.full_name || "Unknown",
+          phone: profile?.phone || "",
+          property: property?.name || "Unknown Property"
+        };
+      });
+    },
+    enabled: !!user?.id,
+  });
 
   const handleTenantSelect = (tenantId: string) => {
     setSelectedTenant(tenantId);
-    const tenant = mockTenants.find(t => t.id === tenantId);
+    const tenant = assignedTenants?.find(t => t.id === tenantId);
     if (tenant) {
       setPhoneNumber(tenant.phone);
       toast.success(`Selected ${tenant.name}`);
@@ -212,14 +237,24 @@ const Profile = () => {
                   <SelectValue placeholder="Choose a tenant..." />
                 </SelectTrigger>
                 <SelectContent className="bg-background/98 backdrop-blur-xl border-border z-50">
-                  {mockTenants.map((tenant) => (
-                    <SelectItem key={tenant.id} value={tenant.id} className="cursor-pointer">
-                      <div className="flex flex-col">
-                        <span className="font-medium">{tenant.name}</span>
-                        <span className="text-xs text-muted-foreground">{tenant.property} • {tenant.phone}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
+                  {tenantsLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                    </div>
+                  ) : assignedTenants && assignedTenants.length > 0 ? (
+                    assignedTenants.map((tenant) => (
+                      <SelectItem key={tenant.id} value={tenant.id} className="cursor-pointer">
+                        <div className="flex flex-col">
+                          <span className="font-medium">{tenant.name}</span>
+                          <span className="text-xs text-muted-foreground">{tenant.property} • {tenant.phone}</span>
+                        </div>
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="py-4 px-2 text-sm text-muted-foreground text-center">
+                      No tenants assigned yet
+                    </div>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -266,27 +301,10 @@ const Profile = () => {
           </Button>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 shadow-medium space-y-4">
-          <h3 className="font-semibold mb-3">Account Settings</h3>
-          
-          <div className="glass-card rounded-xl p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="glass-card p-3 rounded-xl bg-primary/10">
-                  {isDarkMode ? <Moon className="h-6 w-6 text-primary" /> : <Sun className="h-6 w-6 text-primary" />}
-                </div>
-                <div>
-                  <h3 className="font-semibold">Dark Mode</h3>
-                  <p className="text-xs text-muted-foreground">Toggle theme</p>
-                </div>
-              </div>
-              <Switch checked={isDarkMode} onCheckedChange={handleDarkModeToggle} />
-            </div>
-          </div>
-
-          <button className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-muted/50 transition-colors">
+        <div className="glass-card rounded-2xl p-4 shadow-medium">
+          <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors">
             <Settings className="h-5 w-5 text-primary" />
-            <span className="font-medium">Other Settings</span>
+            <span className="font-medium">Account Settings</span>
           </button>
         </div>
 
