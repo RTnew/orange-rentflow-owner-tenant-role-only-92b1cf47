@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import BannerPreviewDialog from "@/components/BannerPreviewDialog";
+import ServicePreviewDialog from "@/components/ServicePreviewDialog";
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ const OwnerDashboard = () => {
   const [currentService, setCurrentService] = useState(0);
   const [selectedBanner, setSelectedBanner] = useState<any>(null);
   const [bannerDialogOpen, setBannerDialogOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!bannerApi) return;
@@ -241,7 +244,10 @@ const OwnerDashboard = () => {
                         <div 
                           key={card.id}
                           className="bg-emerald-700 rounded-3xl p-6 shadow-medium flex flex-col items-center justify-center text-center cursor-pointer transition-transform hover:scale-[0.98] active:scale-95 h-32"
-                          onClick={() => toast.info(`Opening ${card.title}`)}
+                          onClick={() => {
+                            setSelectedService(card);
+                            setServiceDialogOpen(true);
+                          }}
                         >
                           {card.icon_url ? (
                             <img src={card.icon_url} alt={card.title} className="w-10 h-10 mb-2" />
@@ -429,6 +435,13 @@ const OwnerDashboard = () => {
         banner={selectedBanner}
         open={bannerDialogOpen}
         onOpenChange={setBannerDialogOpen}
+      />
+
+      {/* Service Preview Dialog */}
+      <ServicePreviewDialog
+        service={selectedService}
+        open={serviceDialogOpen}
+        onOpenChange={setServiceDialogOpen}
       />
     </div>
   );
