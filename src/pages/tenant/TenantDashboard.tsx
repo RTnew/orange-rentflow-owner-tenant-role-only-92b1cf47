@@ -1,4 +1,4 @@
-import { CreditCard, Clock, CheckCircle, FileText, Home, User, Calendar, Search } from "lucide-react";
+import { CreditCard, FileText, Home, User, Calendar, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import BannerPreviewDialog from "@/components/BannerPreviewDialog";
 
 const TenantDashboard = () => {
   const navigate = useNavigate();
@@ -15,6 +16,8 @@ const TenantDashboard = () => {
   const [serviceApi, setServiceApi] = useState<CarouselApi>();
   const [currentBanner, setCurrentBanner] = useState(0);
   const [currentService, setCurrentService] = useState(0);
+  const [selectedBanner, setSelectedBanner] = useState<any>(null);
+  const [bannerDialogOpen, setBannerDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!bannerApi) return;
@@ -139,7 +142,10 @@ const TenantDashboard = () => {
                   <CarouselItem key={banner.id}>
                     <div 
                       className={`bg-gradient-to-br ${bannerColors[index % bannerColors.length]} rounded-3xl p-6 shadow-glow cursor-pointer transition-transform hover:scale-[0.98] active:scale-95`}
-                      onClick={() => toast.info(`Opening ${banner.title}`)}
+                      onClick={() => {
+                        setSelectedBanner(banner);
+                        setBannerDialogOpen(true);
+                      }}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
@@ -400,6 +406,13 @@ const TenantDashboard = () => {
           </button>
         </div>
       </div>
+
+      {/* Banner Preview Dialog */}
+      <BannerPreviewDialog
+        banner={selectedBanner}
+        open={bannerDialogOpen}
+        onOpenChange={setBannerDialogOpen}
+      />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import BannerPreviewDialog from "@/components/BannerPreviewDialog";
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
@@ -15,6 +16,8 @@ const OwnerDashboard = () => {
   const [serviceApi, setServiceApi] = useState<CarouselApi>();
   const [currentBanner, setCurrentBanner] = useState(0);
   const [currentService, setCurrentService] = useState(0);
+  const [selectedBanner, setSelectedBanner] = useState<any>(null);
+  const [bannerDialogOpen, setBannerDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!bannerApi) return;
@@ -145,7 +148,8 @@ const OwnerDashboard = () => {
   ];
 
   const handleBannerClick = (banner: any) => {
-    toast.info(`Opening ${banner.title} details`);
+    setSelectedBanner(banner);
+    setBannerDialogOpen(true);
   };
 
   const scrollToBanner = (index: number) => {
@@ -419,6 +423,13 @@ const OwnerDashboard = () => {
           </button>
         </div>
       </div>
+
+      {/* Banner Preview Dialog */}
+      <BannerPreviewDialog
+        banner={selectedBanner}
+        open={bannerDialogOpen}
+        onOpenChange={setBannerDialogOpen}
+      />
     </div>
   );
 };
