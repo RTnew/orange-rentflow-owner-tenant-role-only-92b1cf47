@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Edit, Trash2, Plus } from "lucide-react";
+import { Edit, Trash2, Plus, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -26,10 +26,13 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import BannerPreviewDialog from "@/components/BannerPreviewDialog";
 
 export default function BannersList() {
   const navigate = useNavigate();
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [previewBanner, setPreviewBanner] = useState<any>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -163,6 +166,17 @@ export default function BannersList() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => {
+                          setPreviewBanner(banner);
+                          setPreviewOpen(true);
+                        }}
+                        title="Preview"
+                      >
+                        <Eye className="h-4 w-4 text-primary" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => navigate(`/admin/banners/edit/${banner.id}`)}
                       >
                         <Edit className="h-4 w-4" />
@@ -199,6 +213,13 @@ export default function BannersList() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Banner Preview Dialog */}
+      <BannerPreviewDialog
+        banner={previewBanner}
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+      />
     </div>
   );
 }
