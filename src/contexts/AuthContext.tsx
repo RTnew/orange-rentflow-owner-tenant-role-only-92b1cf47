@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch role from Supabase user_roles table
+  // Fetch user role
   const fetchUserRole = async (userId: string): Promise<UserRole | null> => {
     const { data, error } = await supabase
       .from("user_roles")
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .single();
 
     if (error) {
-      console.error("Error fetching user role:", error);
+      console.error("Role fetch error:", error);
       return null;
     }
 
@@ -52,67 +52,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Sign Up
-  const signUp = async (
-    email: string,
-    password: string,
-    fullName: string,
-    phone: string,
-    role: UserRole
-  ) => {
+  const signUp = async (email, password, fullName, phone, role) => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            full_name: fullName,
-            phone,
-          },
+          data: { full_name: fullName, phone },
         },
       });
 
-      if (error) {
-        toast.error("Signup failed");
-        return { error };
-      }
+      if (error) return { error };
 
-      const userId = data.user?.id;
-      if (!userId) {
-        toast.error("User ID missing after signup");
-        return { error: new Error("User ID missing") };
-      }
+      if (!data.user?.id) return { error: new Error("User ID missing") };
 
-      // Insert user role
       const { error: roleError } = await supabase
         .from("user_roles")
-        .insert({ uuid: userId, role });
+        .insert({ uuid: data.user.id, role });
 
-      if (roleError) {
-        toast.error("Failed to assign role");
-        return { error: roleError };
-      }
+      if (roleError) return { error: roleError };
 
-      toast.success("Account created successfully!");
+      toast.success("Account created!");
+
       return { error: null };
     } catch (err) {
-      console.error("Signup crashed:", err);
       return { error: err };
     }
   };
 
   // Sign In
-  const signIn = async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+  const signIn = async (email, password) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (error) return { error };
-      return { error: null };
-    } catch (err) {
-      return { error: err };
-    }
+    return { error };
   };
 
   // Sign Out
@@ -124,42 +99,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     window.location.href = "/";
   };
 
-  // Auth Listener + Redirect Logic
+  // Redirect user based on role
+  const redirectByRole = (role: UserRole | null) => {
+    if (!role) return;
+
+    if (role === "owner") {
+      window.location.href = "/owner/OwnerDashboard";
+    } else if (role === "tenant") {
+      window.location.href = "/tenant/TenantDashboard";
+    } else if (role === "admin") {
+      window.location.href = "/admin";
+    }
+  };
+
+  // Auth Listener
   useEffect(() => {
-    const getInitialSession = async () => {
+    const loadSession = async () => {
       const { data } = await supabase.auth.getSession();
 
       if (data.session?.user) {
         const role = await fetchUserRole(data.session.user.id);
-
         setUser(data.session.user);
         setSession(data.session);
         setUserRole(role);
 
-        // Redirect based on role
-        if (role === "owner") window.location.href = "/owner";
-        if (role === "tenant") window.location.href = "/tenant";
-        if (role === "admin") window.location.href = "/admin";
+        redirectByRole(role);
       }
 
       setLoading(false);
     };
 
-    getInitialSession();
+    loadSession();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (session?.user) {
           const role = await fetchUserRole(session.user.id);
-
           setUser(session.user);
           setSession(session);
           setUserRole(role);
 
-          // Redirect
-          if (role === "owner") window.location.href = "/owner";
-          if (role === "tenant") window.location.href = "/tenant";
-          if (role === "admin") window.location.href = "/admin";
+          redirectByRole(role);
         } else {
           setUser(null);
           setSession(null);
@@ -168,9 +148,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    return () => {
-      listener.subscription.unsubscribe();
-    };
+    return () => listener.subscription.unsubscribe();
   }, []);
 
   return (
@@ -192,7 +170,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined)
+  if (!context)
     throw new Error("useAuth must be used inside AuthProvider");
+
   return context;
 };
