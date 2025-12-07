@@ -35,27 +35,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // ============================
-  // FETCH ROLE FROM user_roles
-  // ============================
+  // ======================================
+  // FETCH USER ROLE (FIXED)
+  // ======================================
   const fetchUserRole = async (userId: string): Promise<UserRole | null> => {
-    const { data, error } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("public_user_roles") // FIXED: correct table
+        .select("role")
+        .eq("uuid", userId) // FIXED: correct column
+        .single();
 
-    if (error) {
-      console.error("Error fetching user role:", error);
+      if (error) {
+        console.error("Error fetching user role:", error);
+        return null;
+      }
+
+      return data?.role || null;
+    } catch (err) {
+      console.error("fetchUserRole crashed:", err);
       return null;
     }
-
-    return data?.role || null;
   };
 
-  // ============================
-  // SIGN UP FUNCTION
-  // ============================
+  // ======================================
+  // SIGN UP
+  // ======================================
   const signUp = async (
     email: string,
     password: string,
@@ -64,16 +69,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     role: UserRole
   ) => {
     try {
-      // Create Auth User + Metadata
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            full_name: fullName,
-            phone,
-            role,
-          },
+          data: { full_name: fullName, phone, role },
         },
       });
 
@@ -83,15 +83,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const userId = data.user?.id;
-      if (!userId) {
-        toast.error("User ID missing after signup");
-        return { error: new Error("User ID missing") };
-      }
+      if (!userId) return { error: new Error("User ID missing") };
 
-      // Insert into user_roles table
+      // Insert role correctly
       const { error: rError } = await supabase
-        .from("user_roles")
-        .insert({ user_id: userId, role });
+        .from("public_user_roles")
+        .insert({ uuid: userId, role }); // FIXED correct column
 
       if (rError) {
         console.error("Role insert error:", rError);
@@ -99,7 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { error: rError };
       }
 
-      toast.success("Account created successfully!");
+      toast.success("Account created!");
       return { error: null };
     } catch (err) {
       console.error("Signup crashed:", err);
@@ -107,26 +104,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // ============================
-  // SIGN IN FUNCTION
-  // ============================
+  // ======================================
+  // SIGN IN (FREEZE FIXED)
+  // ======================================
   const signIn = async (email: string, password: string) => {
     try {
+      setLoading(true);
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) return { error };
+      if (error) {
+        toast.error("Invalid credentials");
+        return { error };
+      }
+
       return { error: null };
     } catch (err) {
+      console.error("Login crashed:", err);
       return { error: err };
+    } finally {
+      setLoading(false); // ALWAYS stops loading → freeze impossible
     }
   };
 
-  // ============================
-  // SIGN OUT FUNCTION
-  // ============================
+  // ======================================
+  // SIGN OUT
+  // ======================================
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -134,12 +140,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUserRole(null);
   };
 
-  // ============================
+  // ======================================
   // AUTH STATE LISTENER
-  // ============================
+  // ======================================
   useEffect(() => {
-    const getInitialSession = async () => {
+    const loadSession = async () => {
       const { data } = await supabase.auth.getSession();
+
       if (data.session?.user) {
         const role = await fetchUserRole(data.session.user.id);
 
@@ -147,15 +154,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(data.session);
         setUserRole(role);
       }
+
       setLoading(false);
     };
 
-    getInitialSession();
+    loadSession();
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
+    const { data: authListener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (session?.user) {
           const role = await fetchUserRole(session.user.id);
+
           setUser(session.user);
           setSession(session);
           setUserRole(role);
@@ -167,9 +176,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    return () => {
-      listener.subscription.unsubscribe();
-    };
+    return () => authListener.subscription.unsubscribe();
   }, []);
 
   return (
@@ -189,12 +196,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// ====================================
-// CUSTOM HOOK
-// ====================================
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined)
-    throw new Error("useAuth must be used inside AuthProvider");
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
 };
